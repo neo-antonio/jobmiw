@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="JobMiw – Your cute pastel job application tracker 🐱" />
+  <meta name="theme-color" content="#9b72d4" />
+  <title>JobMiw 🐱</title>
+  <link rel="icon" type="image/png" href="favicon.png" />
+  <link rel="apple-touch-icon" href="favicon.png" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-inner">
+    <a class="logo-wrap" href="#">
+      <img src="favicon.png" alt="JobMiw cat logo" />
+      <span class="logo-title">Job<span>Miw</span></span>
+    </a>
+    <div class="header-stats">
+      <div class="stat-chip">Total: <strong id="hdr-total">0</strong></div>
+      <div class="stat-chip">Active: <strong id="hdr-active">0</strong></div>
+      <div class="stat-chip">Interviews: <strong id="hdr-interviews">0</strong></div>
+    </div>
+  </div>
+</header>
+
+<!-- TABS NAV -->
+<nav class="tabs-nav">
+  <div class="tabs-nav-inner">
+    <button class="tab-btn active" data-tab="apply">
+      <span class="tab-icon">📝</span>Apply
+    </button>
+    <button class="tab-btn" data-tab="list">
+      <span class="tab-icon">📋</span>List
+    </button>
+    <button class="tab-btn" data-tab="prep">
+      <span class="tab-icon">⭐</span>Prep
+    </button>
+    <button class="tab-btn" data-tab="profile">
+      <span class="tab-icon">🐱</span>Profile
+    </button>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<main class="main-content">
+
+  <!-- ══════════════════════════════════════
+       TAB 1 – APPLY
+  ══════════════════════════════════════ -->
+  <section id="tab-apply" class="tab-panel active">
+    <div class="section-title">📝 Record Application</div>
+    <p class="section-sub">Fill in your job application details. Fields marked as optional can be skipped.</p>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-icon">🏢</span>
+        <h2>Job Details</h2>
+      </div>
+      <form id="apply-form">
+        <div class="form-grid">
+
+          <!-- Company -->
+          <div class="form-group">
+            <label for="f-company">Company Name</label>
+            <input type="text" id="f-company" placeholder="e.g. Acme Corp" required />
+          </div>
+
+          <!-- Position -->
+          <div class="form-group">
+            <label for="f-position">Position / Job Title</label>
+            <input type="text" id="f-position" placeholder="e.g. Frontend Developer" required />
+          </div>
+
+          <!-- Date Applied -->
+          <div class="form-group">
+            <label for="f-date">Date Applied</label>
+            <input type="date" id="f-date" required />
+          </div>
+
+          <!-- Source -->
+          <div class="form-group">
+            <label for="f-source">Source</label>
+            <select id="f-source">
+              <option value="">Select source…</option>
+              <option value="LinkedIn">LinkedIn</option>
+              <option value="JobStreet">JobStreet</option>
+              <option value="BossJob">BossJob</option>
+              <option value="Indeed">Indeed</option>
+              <option value="Referral">Referral</option>
+              <option value="Walk-in">Walk-in</option>
+            </select>
+          </div>
+
+          <!-- Location -->
+          <div class="form-group">
+            <label for="f-location">Location</label>
+            <select id="f-location">
+              <option value="">Select city…</option>
+              <option value="Manila">Manila</option>
+              <option value="Makati">Makati</option>
+              <option value="Quezon City">Quezon City</option>
+              <option value="Pasig City">Pasig City</option>
+              <option value="Mandaluyong">Mandaluyong</option>
+              <option value="Pasay City">Pasay City</option>
+            </select>
+          </div>
+
+          <!-- Location Type -->
+          <div class="form-group">
+            <label for="f-loctype">Location Type <span class="optional">(optional)</span></label>
+            <select id="f-loctype">
+              <option value="">Select type…</option>
+              <option value="On-site">On-site (FTF)</option>
+              <option value="Hybrid">Hybrid</option>
+              <option value="Remote">Remote (WFH)</option>
+            </select>
+          </div>
+
+          <!-- Employment Type -->
+          <div class="form-group">
+            <label for="f-emptype">Employment Type</label>
+            <select id="f-emptype">
+              <option value="">Select type…</option>
+              <option value="Regular">Regular / Permanent</option>
+              <option value="Contractual">Contractual</option>
+              <option value="Seasonal">Seasonal</option>
+              <option value="Part-time">Part-time</option>
+              <option value="Freelance">Freelance</option>
+            </select>
+          </div>
+
+          <!-- Work Schedule -->
+          <div class="form-group">
+            <label for="f-schedule">Work Schedule <span class="optional">(optional)</span></label>
+            <select id="f-schedule">
+              <option value="">Select schedule…</option>
+              <option value="Mon-Fri Day">Mon–Fri, Day shift</option>
+              <option value="Mon-Sat Day">Mon–Sat, Day shift</option>
+              <option value="Night shift">Night shift</option>
+              <option value="Shifting">Shifting / Rotating</option>
+              <option value="Flexible">Flexible</option>
+            </select>
+          </div>
+
+          <!-- Salary Range -->
+          <div class="form-group">
+            <label for="f-salary-min">Salary Range <span class="optional">(optional)</span></label>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;min-width:0;">
+              <input type="number" id="f-salary-min" placeholder="Min ₱" min="0" />
+              <span style="color:var(--text3);font-weight:600;">–</span>
+              <input type="number" id="f-salary-max" placeholder="Max ₱" min="0" />
+            </div>
+          </div>
+
+          <!-- Experience Preferred -->
+          <div class="form-group">
+            <label for="f-experience">Years of Exp. Preferred <span class="optional">(optional)</span></label>
+            <input type="text" id="f-experience" placeholder="e.g. 1–3 years, Fresh grad ok" />
+          </div>
+
+          <!-- Personal Interest -->
+          <div class="form-group full-width">
+            <label>Personal Interest <span style="color:var(--text2);font-weight:400;font-size:0.8rem;">(how excited are you?)</span></label>
+            <div class="interest-wrap">
+              <div class="interest-dots" id="interest-dots"></div>
+              <span class="interest-value" id="interest-val">5/10</span>
+            </div>
+          </div>
+
+          <!-- Skills Needed -->
+          <div class="form-group full-width">
+            <label for="f-skills">Skills Needed <span class="optional">(optional)</span></label>
+            <input type="text" id="f-skills" placeholder="e.g. React, Node.js, Excel (comma-separated)" />
+          </div>
+
+          <!-- Contact Person -->
+          <div class="form-group">
+            <label for="f-contact-person">Contact Person <span class="optional">(optional)</span></label>
+            <input type="text" id="f-contact-person" placeholder="e.g. HR Manager Name" />
+          </div>
+
+          <!-- Contact Email -->
+          <div class="form-group">
+            <label for="f-contact-email">Contact Email <span class="optional">(optional)</span></label>
+            <input type="email" id="f-contact-email" placeholder="hr@company.com" />
+          </div>
+
+          <!-- Contact Number -->
+          <div class="form-group">
+            <label for="f-contact-num">Contact Number <span class="optional">(optional)</span></label>
+            <input type="tel" id="f-contact-num" placeholder="+63 9XX XXX XXXX" />
+          </div>
+
+          <!-- Notes -->
+          <div class="form-group full-width">
+            <label for="f-notes">Additional Notes <span class="optional">(optional)</span></label>
+            <textarea id="f-notes" placeholder="Any extra info, instructions, or reminders…"></textarea>
+          </div>
+
+        </div>
+
+        <div style="margin-top:20px;display:flex;gap:12px;flex-wrap:wrap;">
+          <button type="submit" class="btn btn-primary">
+            🐱 Save Application
+          </button>
+          <button type="button" class="btn btn-secondary" id="clear-form-btn">
+            ✨ Clear Form
+          </button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════
+       TAB 2 – LIST
+  ══════════════════════════════════════ -->
+  <section id="tab-list" class="tab-panel">
+    <div class="section-title">📋 My Applications</div>
+    <p class="section-sub">Search, filter and update your job applications.</p>
+
+    <div class="search-bar">
+      <input type="text" id="list-search" placeholder="🔍 Search company or position…" />
+      <select id="list-source-filter" style="max-width:160px;">
+        <option value="">All Sources</option>
+        <option value="LinkedIn">LinkedIn</option>
+        <option value="JobStreet">JobStreet</option>
+        <option value="BossJob">BossJob</option>
+        <option value="Indeed">Indeed</option>
+        <option value="Referral">Referral</option>
+        <option value="Walk-in">Walk-in</option>
+      </select>
+    </div>
+
+    <div class="filter-chips" id="list-status-chips">
+      <button class="filter-chip active" data-status="">All</button>
+      <button class="filter-chip" data-status="Applied">Applied</button>
+      <button class="filter-chip" data-status="Viewed">Viewed</button>
+      <button class="filter-chip" data-status="Shortlisted">Shortlisted</button>
+      <button class="filter-chip" data-status="Interview">Interview</button>
+      <button class="filter-chip" data-status="Offered">Offered</button>
+      <button class="filter-chip" data-status="Rejected">Rejected</button>
+    </div>
+
+    <div class="apps-grid" id="list-grid">
+      <div class="empty-state">
+        <div class="empty-icon">🐱</div>
+        <p><strong>No applications yet!</strong><br/>Go to the Apply tab to record your first one.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════
+       TAB 3 – PREP
+  ══════════════════════════════════════ -->
+  <section id="tab-prep" class="tab-panel">
+    <div class="section-title">⭐ Job Preparation</div>
+    <p class="section-sub">Your best candidacy rankings based on alignment, recency, and interest.</p>
+
+    <!-- Pie Chart -->
+    <div class="card" id="prep-chart-card">
+      <div class="card-header">
+        <span class="card-icon">🥧</span>
+        <h2>Chance Distribution</h2>
+      </div>
+      <div class="chart-wrap">
+        <svg class="pie-chart-svg" id="pie-svg" width="140" height="140" viewBox="0 0 140 140"></svg>
+        <div class="chart-legend" id="pie-legend"></div>
+      </div>
+    </div>
+
+    <!-- Filter -->
+    <div class="filter-chips" id="prep-filter-chips">
+      <button class="filter-chip active" data-chance="">All</button>
+      <button class="filter-chip" data-chance="High">🟢 High</button>
+      <button class="filter-chip" data-chance="Medium">🟡 Medium</button>
+      <button class="filter-chip" data-chance="Low">🔴 Low</button>
+      <button class="filter-chip" data-chance="Archived">📦 Archived</button>
+    </div>
+
+    <!-- AI Button -->
+    <div style="margin-bottom:20px;">
+      <button class="btn btn-ai" id="ai-interview-btn">
+        🤖 AI Interview Trainer
+      </button>
+    </div>
+
+    <!-- Chance sections -->
+    <div id="prep-grid"></div>
+  </section>
+
+  <!-- ══════════════════════════════════════
+       TAB 4 – PROFILE
+  ══════════════════════════════════════ -->
+  <section id="tab-profile" class="tab-panel">
+    <div class="section-title">🐱 My Profile</div>
+    <p class="section-sub">Set your preferences to improve job matching accuracy.</p>
+
+    <!-- Resume Upload -->
+    <div class="card">
+      <div class="card-header"><span class="card-icon">📄</span><h2>Resume</h2></div>
+      <div class="resume-upload-area" id="resume-drop-zone">
+        <div class="upload-icon">📎</div>
+        <p>Drag & drop your PDF resume here, or click to browse</p>
+        <button type="button" class="btn btn-secondary btn-sm" onclick="document.getElementById('resume-file').click()">
+          Browse File
+        </button>
+        <input type="file" id="resume-file" accept=".pdf" hidden />
+      </div>
+      <div class="resume-info" id="resume-info" style="display:none;">
+        <span class="resume-icon">📄</span>
+        <div>
+          <div class="resume-name" id="resume-name">resume.pdf</div>
+          <div class="resume-size" id="resume-size">0 KB</div>
+        </div>
+        <button class="btn btn-danger btn-sm" style="margin-left:auto;" id="remove-resume-btn">Remove</button>
+      </div>
+
+      <div id="extracted-section" style="display:none;margin-top:16px;">
+        <div class="divider"></div>
+        <div class="profile-section">
+          <h3>Extracted Info (editable)</h3>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="p-name">Your Name</label>
+              <input type="text" id="p-name" placeholder="Full name" />
+            </div>
+            <div class="form-group">
+              <label for="p-exp">Years of Experience</label>
+              <input type="text" id="p-exp" placeholder="e.g. 2 years" />
+            </div>
+          </div>
+          <div style="margin-top:12px;">
+            <label>Skills (from resume)</label>
+            <div class="skills-tags" id="profile-skills-tags"></div>
+            <div class="add-skill-row">
+              <input type="text" id="add-skill-input" placeholder="Add a skill…" />
+              <button class="btn btn-secondary btn-sm" id="add-skill-btn">+ Add</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Preferences -->
+    <div class="card">
+      <div class="card-header"><span class="card-icon">⚙️</span><h2>Job Preferences</h2></div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="pref-location">Preferred Location</label>
+          <select id="pref-location">
+            <option value="">No preference</option>
+            <option value="Manila">Manila</option>
+            <option value="Makati">Makati</option>
+            <option value="Quezon City">Quezon City</option>
+            <option value="Pasig City">Pasig City</option>
+            <option value="Mandaluyong">Mandaluyong</option>
+            <option value="Pasay City">Pasay City</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="pref-loctype">Preferred Location Type</label>
+          <select id="pref-loctype">
+            <option value="">No preference</option>
+            <option value="On-site">On-site (FTF)</option>
+            <option value="Hybrid">Hybrid</option>
+            <option value="Remote">Remote (WFH)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="pref-emptype">Preferred Employment Type</label>
+          <select id="pref-emptype">
+            <option value="">No preference</option>
+            <option value="Regular">Regular / Permanent</option>
+            <option value="Contractual">Contractual</option>
+            <option value="Part-time">Part-time</option>
+            <option value="Freelance">Freelance</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="pref-schedule">Preferred Work Schedule</label>
+          <select id="pref-schedule">
+            <option value="">No preference</option>
+            <option value="Mon-Fri Day">Mon–Fri, Day shift</option>
+            <option value="Mon-Sat Day">Mon–Sat, Day shift</option>
+            <option value="Night shift">Night shift</option>
+            <option value="Flexible">Flexible</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Expected Salary Range (₱)</label>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;min-width:0;">
+            <input type="number" id="pref-salary-min" placeholder="Min ₱" />
+            <span style="color:var(--text3);font-weight:600;">–</span>
+            <input type="number" id="pref-salary-max" placeholder="Max ₱" />
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:16px;">
+        <button class="btn btn-primary" id="save-prefs-btn">💾 Save Preferences</button>
+      </div>
+    </div>
+
+    <!-- Advanced: Weights -->
+    <div class="card">
+      <div class="collapsible-header" id="weights-toggle">
+        <h3>⚖️ Advanced: Scoring Weights</h3>
+        <span class="collapsible-toggle">▼</span>
+      </div>
+      <div class="collapsible-body collapsed" id="weights-body" style="max-height:0;">
+        <div style="padding-top:16px;">
+          <p style="font-size:0.82rem;color:var(--text2);margin-bottom:16px;">Adjust how much each factor contributes to your candidacy score. Total weights are normalized automatically.</p>
+          <div id="weights-sliders"></div>
+          <div style="margin-top:16px;">
+            <button class="btn btn-secondary btn-sm" id="reset-weights-btn">↺ Reset to Default</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Appearance -->
+    <div class="card">
+      <div class="card-header"><span class="card-icon">🎨</span><h2>Appearance</h2></div>
+      <div class="profile-section">
+        <h3>Color Theme</h3>
+        <div class="theme-pickers" id="theme-swatches">
+          <div class="theme-swatch active" data-theme="" style="background:linear-gradient(135deg,#9b72d4,#e8a0c8);" title="Purple (Default)"></div>
+          <div class="theme-swatch" data-theme="blue" style="background:linear-gradient(135deg,#6888d4,#a0c8f5);" title="Blue"></div>
+          <div class="theme-swatch" data-theme="red" style="background:linear-gradient(135deg,#d46872,#f5a0a8);" title="Red/Pink"></div>
+          <div class="theme-swatch" data-theme="dark" style="background:linear-gradient(135deg,#2a2040,#9b72d4);" title="Dark"></div>
+        </div>
+      </div>
+      <div class="profile-section" style="margin-top:16px;">
+        <h3>Font</h3>
+        <div class="font-picker" id="font-picker">
+          <button class="font-btn active" data-font="Fredoka" style="font-family:'Fredoka',sans-serif;">Fredoka</button>
+          <button class="font-btn" data-font="Poppins" style="font-family:'Poppins',sans-serif;">Poppins</button>
+          <button class="font-btn" data-font="Arial" style="font-family:'Arial',sans-serif;">Arial</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Data -->
+    <div class="card">
+      <div class="card-header"><span class="card-icon">💾</span><h2>Data Management</h2></div>
+      <div class="io-row">
+        <button class="btn btn-secondary" id="export-csv-btn">⬇️ Export CSV</button>
+        <label class="btn btn-secondary" style="cursor:pointer;">
+          ⬆️ Import CSV
+          <input type="file" id="import-csv-file" accept=".csv" hidden />
+        </label>
+      </div>
+      <div class="divider"></div>
+      <div class="danger-zone">
+        <h3>⚠️ Danger Zone</h3>
+        <p style="font-size:0.82rem;color:var(--text2);margin-bottom:12px;">This will permanently delete all your job applications and profile data.</p>
+        <button class="btn btn-danger" id="delete-all-btn">🗑️ Delete All Data</button>
+      </div>
+    </div>
+
+  </section>
+
+</main>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <a href="https://neushimo.com" target="_blank" rel="noopener">Visit neushimo.com for updates</a><br/>
+  ©2026 Neo Antonio · All rights reserved<br/>
+  <span style="color:var(--primary-light);">JobMiw v1.0</span> 🐱
+</footer>
+
+<!-- TOAST CONTAINER -->
+<div class="toast-container" id="toast-container"></div>
+
+<!-- ══════════════════════════════
+     MODALS
+══════════════════════════════ -->
+
+<!-- Edit App Modal -->
+<div class="modal-overlay" id="edit-modal" style="display:none;">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">✏️ Edit Application</span>
+      <button class="modal-close" onclick="closeModal('edit-modal')">✕</button>
+    </div>
+    <div class="form-grid" id="edit-form-inner"></div>
+    <div style="margin-top:20px;display:flex;gap:10px;flex-wrap:wrap;">
+      <button class="btn btn-primary" id="save-edit-btn">💾 Save Changes</button>
+      <button class="btn btn-secondary" onclick="closeModal('edit-modal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirm Modal -->
+<div class="modal-overlay" id="delete-modal" style="display:none;">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">🗑️ Delete Application</span>
+      <button class="modal-close" onclick="closeModal('delete-modal')">✕</button>
+    </div>
+    <p style="color:var(--text2);font-size:0.9rem;margin-bottom:20px;">Are you sure you want to delete <strong id="delete-app-name"></strong>? This cannot be undone.</p>
+    <div style="display:flex;gap:10px;">
+      <button class="btn btn-danger" id="confirm-delete-btn">🗑️ Yes, Delete</button>
+      <button class="btn btn-secondary" onclick="closeModal('delete-modal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- AI Interview Modal -->
+<div class="modal-overlay" id="ai-modal" style="display:none;">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">🤖 AI Interview Trainer</span>
+      <button class="modal-close" onclick="closeModal('ai-modal')">✕</button>
+    </div>
+    <p style="color:var(--text2);font-size:0.88rem;margin-bottom:4px;">Select which job you want to practice an interview for:</p>
+    <div class="ai-modal-job-list" id="ai-job-list"></div>
+    <div class="disclaimer">
+      ⚠️ <strong>Disclaimer:</strong> This feature redirects you to ChatGPT for a mock interview session (initial / HR screening). JobMiw is not liable for any success or failure in your actual job interviews. It is your sole responsibility to research and prepare for actual job interviews.
+    </div>
+  </div>
+</div>
+
+<!-- Delete All Confirm Modal -->
+<div class="modal-overlay" id="delete-all-modal" style="display:none;">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">⚠️ Delete All Data</span>
+      <button class="modal-close" onclick="closeModal('delete-all-modal')">✕</button>
+    </div>
+    <p style="color:var(--text2);font-size:0.9rem;margin-bottom:20px;">This will permanently delete <strong>all your applications and profile data</strong>. This cannot be undone.</p>
+    <p style="font-size:0.85rem;color:var(--text3);margin-bottom:20px;">Type <strong>DELETE</strong> to confirm:</p>
+    <input type="text" id="delete-all-confirm-input" placeholder="Type DELETE" style="margin-bottom:16px;" />
+    <div style="display:flex;gap:10px;">
+      <button class="btn btn-danger" id="confirm-delete-all-btn">🗑️ Delete Everything</button>
+      <button class="btn btn-secondary" onclick="closeModal('delete-all-modal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
