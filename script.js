@@ -870,5 +870,24 @@ document.querySelectorAll('.modal-overlay').forEach(overlay => {
 
 // ── PWA Register ──────────────────────────────
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js').catch(() => {});
+  navigator.serviceWorker.register('./sw.js').then(reg => {
+    // Force an update check the moment the app opens
+    reg.update();
+
+    // Keep checking while the app stays open (every 60s)
+    setInterval(() => reg.update(), 60 * 1000);
+
+    // Also re-check whenever the tab/app regains focus
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') reg.update();
+    });
+
+    // When a new SW takes over, the page is now stale — reload once
+    let refreshing = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (refreshing) return;
+      refreshing = true;
+      window.location.reload();
+    });
+  }).catch(() => {});
 }
