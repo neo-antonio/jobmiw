@@ -1,10 +1,12 @@
-const CACHE_NAME = 'jobmiw-v1';
+// IMPORTANT: bump this version string on every deploy so the
+// service worker is detected as changed and updates are picked up fast.
+const CACHE_NAME = 'jobmiw-v1.0.1';
 const ASSETS = [
-  '/',
-  '/index.html',
-  '/style.css',
-  '/script.js',
-  '/favicon.png',
+  './',
+  './index.html',
+  './style.css',
+  './script.js',
+  './favicon.png',
   'https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap'
 ];
 
@@ -22,6 +24,6 @@ self.addEventListener('activate', e => {
 
 self.addEventListener('fetch', e => {
   e.respondWith(
-    caches.match(e.request).then(r => r || fetch(e.request).catch(() => caches.match('/index.html')))
+    caches.match(e.request).then(r => r || fetch(e.request).catch(() => caches.match('./index.html')))
   );
 });
