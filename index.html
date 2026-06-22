@@ -16,38 +16,31 @@
 </head>
 <body>
 
-<!-- HEADER -->
+<!-- HEADER (contains logo + tabs nav) -->
 <header class="header">
   <div class="header-inner">
     <a class="logo-wrap" href="#">
-      <img src="favicon.png" alt="JobMiw cat logo" />
+      <img src="favicon.png" alt="JobMiw logo" />
       <span class="logo-title">Job<span>Miw</span></span>
     </a>
-    <div class="header-stats">
-      <div class="stat-chip">Total: <strong id="hdr-total">0</strong></div>
-      <div class="stat-chip">Active: <strong id="hdr-active">0</strong></div>
-      <div class="stat-chip">Interviews: <strong id="hdr-interviews">0</strong></div>
-    </div>
+    <nav class="tabs-nav" id="tabs-nav">
+      <div class="tabs-nav-inner">
+        <button class="tab-btn active" data-tab="apply">
+          <span class="tab-icon emoji">📝</span><span class="tab-label">Apply</span>
+        </button>
+        <button class="tab-btn" data-tab="list">
+          <span class="tab-icon emoji">📋</span><span class="tab-label">List</span>
+        </button>
+        <button class="tab-btn" data-tab="prep">
+          <span class="tab-icon emoji">⭐</span><span class="tab-label">Prep</span>
+        </button>
+        <button class="tab-btn" data-tab="profile">
+          <span class="tab-icon emoji">🐱</span><span class="tab-label">Profile</span>
+        </button>
+      </div>
+    </nav>
   </div>
 </header>
-
-<!-- TABS NAV -->
-<nav class="tabs-nav">
-  <div class="tabs-nav-inner">
-    <button class="tab-btn active" data-tab="apply">
-      <span class="tab-icon">📝</span>Apply
-    </button>
-    <button class="tab-btn" data-tab="list">
-      <span class="tab-icon">📋</span>List
-    </button>
-    <button class="tab-btn" data-tab="prep">
-      <span class="tab-icon">⭐</span>Prep
-    </button>
-    <button class="tab-btn" data-tab="profile">
-      <span class="tab-icon">🐱</span>Profile
-    </button>
-  </div>
-</nav>
 
 <!-- MAIN -->
 <main class="main-content">
@@ -56,12 +49,12 @@
        TAB 1 – APPLY
   ══════════════════════════════════════ -->
   <section id="tab-apply" class="tab-panel active">
-    <div class="section-title">📝 Record Application</div>
+    <div class="section-title"><span class="emoji">📝 </span>Record Application</div>
     <p class="section-sub">Fill in your job application details. Fields marked as optional can be skipped.</p>
 
     <div class="card">
       <div class="card-header">
-        <span class="card-icon">🏢</span>
+        <span class="card-icon emoji">🏢</span>
         <h2>Job Details</h2>
       </div>
       <form id="apply-form">
@@ -88,7 +81,7 @@
           <!-- Source -->
           <div class="form-group">
             <label for="f-source">Source</label>
-            <select id="f-source">
+            <select id="f-source" onchange="toggleOther(this,'f-source-other')">
               <option value="">Select source…</option>
               <option value="LinkedIn">LinkedIn</option>
               <option value="JobStreet">JobStreet</option>
@@ -96,13 +89,15 @@
               <option value="Indeed">Indeed</option>
               <option value="Referral">Referral</option>
               <option value="Walk-in">Walk-in</option>
+              <option value="Other">Other…</option>
             </select>
+            <input type="text" id="f-source-other" class="other-input" placeholder="Specify source…" style="display:none;margin-top:6px;" />
           </div>
 
           <!-- Location -->
           <div class="form-group">
             <label for="f-location">Location</label>
-            <select id="f-location">
+            <select id="f-location" onchange="toggleOther(this,'f-location-other')">
               <option value="">Select city…</option>
               <option value="Manila">Manila</option>
               <option value="Makati">Makati</option>
@@ -110,7 +105,10 @@
               <option value="Pasig City">Pasig City</option>
               <option value="Mandaluyong">Mandaluyong</option>
               <option value="Pasay City">Pasay City</option>
+              <option value="Taguig">Taguig</option>
+              <option value="Other">Other…</option>
             </select>
+            <input type="text" id="f-location-other" class="other-input" placeholder="Specify location…" style="display:none;margin-top:6px;" />
           </div>
 
           <!-- Location Type -->
@@ -140,22 +138,24 @@
           <!-- Work Schedule -->
           <div class="form-group">
             <label for="f-schedule">Work Schedule <span class="optional">(optional)</span></label>
-            <select id="f-schedule">
+            <select id="f-schedule" onchange="toggleOther(this,'f-schedule-other')">
               <option value="">Select schedule…</option>
               <option value="Mon-Fri Day">Mon–Fri, Day shift</option>
               <option value="Mon-Sat Day">Mon–Sat, Day shift</option>
               <option value="Night shift">Night shift</option>
               <option value="Shifting">Shifting / Rotating</option>
               <option value="Flexible">Flexible</option>
+              <option value="Other">Other…</option>
             </select>
+            <input type="text" id="f-schedule-other" class="other-input" placeholder="Specify schedule…" style="display:none;margin-top:6px;" />
           </div>
 
           <!-- Salary Range -->
-          <div class="form-group">
-            <label for="f-salary-min">Salary Range <span class="optional">(optional)</span></label>
-            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;min-width:0;">
+          <div class="form-group salary-range-group">
+            <label>Salary Range <span class="optional">(optional)</span></label>
+            <div class="salary-row">
               <input type="number" id="f-salary-min" placeholder="Min ₱" min="0" />
-              <span style="color:var(--text3);font-weight:600;">–</span>
+              <span class="salary-sep">–</span>
               <input type="number" id="f-salary-max" placeholder="Max ₱" min="0" />
             </div>
           </div>
@@ -184,7 +184,13 @@
           <!-- Contact Person -->
           <div class="form-group">
             <label for="f-contact-person">Contact Person <span class="optional">(optional)</span></label>
-            <input type="text" id="f-contact-person" placeholder="e.g. HR Manager Name" />
+            <input type="text" id="f-contact-person" placeholder="e.g. Maria Santos" />
+          </div>
+
+          <!-- Contact Position -->
+          <div class="form-group">
+            <label for="f-contact-position">Contact Position <span class="optional">(optional)</span></label>
+            <input type="text" id="f-contact-position" placeholder="e.g. HR Manager, Recruiter" />
           </div>
 
           <!-- Contact Email -->
@@ -209,10 +215,10 @@
 
         <div style="margin-top:20px;display:flex;gap:12px;flex-wrap:wrap;">
           <button type="submit" class="btn btn-primary">
-            🐱 Save Application
+            <span class="emoji">🐱 </span>Save Application
           </button>
           <button type="button" class="btn btn-secondary" id="clear-form-btn">
-            ✨ Clear Form
+            <span class="emoji">✨ </span>Clear Form
           </button>
         </div>
       </form>
@@ -223,7 +229,7 @@
        TAB 2 – LIST
   ══════════════════════════════════════ -->
   <section id="tab-list" class="tab-panel">
-    <div class="section-title">📋 My Applications</div>
+    <div class="section-title"><span class="emoji">📋 </span>My Applications</div>
     <p class="section-sub">Search, filter and update your job applications.</p>
 
     <div class="search-bar">
@@ -236,6 +242,7 @@
         <option value="Indeed">Indeed</option>
         <option value="Referral">Referral</option>
         <option value="Walk-in">Walk-in</option>
+        <option value="Other">Other</option>
       </select>
     </div>
 
@@ -251,7 +258,7 @@
 
     <div class="apps-grid" id="list-grid">
       <div class="empty-state">
-        <div class="empty-icon">🐱</div>
+        <div class="empty-icon emoji">🐱</div>
         <p><strong>No applications yet!</strong><br/>Go to the Apply tab to record your first one.</p>
       </div>
     </div>
@@ -261,13 +268,13 @@
        TAB 3 – PREP
   ══════════════════════════════════════ -->
   <section id="tab-prep" class="tab-panel">
-    <div class="section-title">⭐ Job Preparation</div>
+    <div class="section-title"><span class="emoji">⭐ </span>Job Preparation</div>
     <p class="section-sub">Your best candidacy rankings based on alignment, recency, and interest.</p>
 
     <!-- Pie Chart -->
     <div class="card" id="prep-chart-card">
       <div class="card-header">
-        <span class="card-icon">🥧</span>
+        <span class="card-icon emoji">🥧</span>
         <h2>Chance Distribution</h2>
       </div>
       <div class="chart-wrap">
@@ -279,16 +286,16 @@
     <!-- Filter -->
     <div class="filter-chips" id="prep-filter-chips">
       <button class="filter-chip active" data-chance="">All</button>
-      <button class="filter-chip" data-chance="High">🟢 High</button>
-      <button class="filter-chip" data-chance="Medium">🟡 Medium</button>
-      <button class="filter-chip" data-chance="Low">🔴 Low</button>
-      <button class="filter-chip" data-chance="Archived">📦 Archived</button>
+      <button class="filter-chip" data-chance="High">High</button>
+      <button class="filter-chip" data-chance="Medium">Medium</button>
+      <button class="filter-chip" data-chance="Low">Low</button>
+      <button class="filter-chip" data-chance="Archived"><span class="emoji">📦 </span>Archived</button>
     </div>
 
     <!-- AI Button -->
     <div style="margin-bottom:20px;">
       <button class="btn btn-ai" id="ai-interview-btn">
-        🤖 AI Interview Trainer
+        <span class="emoji">🤖 </span>AI Interview Trainer
       </button>
     </div>
 
@@ -300,12 +307,12 @@
        TAB 4 – PROFILE
   ══════════════════════════════════════ -->
   <section id="tab-profile" class="tab-panel">
-    <div class="section-title">🐱 My Profile</div>
+    <div class="section-title"><span class="emoji">🐱 </span>My Profile</div>
     <p class="section-sub">Set your preferences to improve job matching accuracy.</p>
 
     <!-- Resume Upload -->
     <div class="card">
-      <div class="card-header"><span class="card-icon">📄</span><h2>Resume</h2></div>
+      <div class="card-header"><span class="card-icon emoji">📄</span><h2>Resume</h2></div>
       <div class="resume-upload-area" id="resume-drop-zone">
         <div class="upload-icon">📎</div>
         <p>Drag & drop your PDF resume here, or click to browse</p>
@@ -315,7 +322,7 @@
         <input type="file" id="resume-file" accept=".pdf" hidden />
       </div>
       <div class="resume-info" id="resume-info" style="display:none;">
-        <span class="resume-icon">📄</span>
+        <span class="resume-icon emoji">📄</span>
         <div>
           <div class="resume-name" id="resume-name">resume.pdf</div>
           <div class="resume-size" id="resume-size">0 KB</div>
@@ -351,7 +358,7 @@
 
     <!-- Preferences -->
     <div class="card">
-      <div class="card-header"><span class="card-icon">⚙️</span><h2>Job Preferences</h2></div>
+      <div class="card-header"><span class="card-icon emoji">⚙️</span><h2>Job Preferences</h2></div>
       <div class="form-grid">
         <div class="form-group">
           <label for="pref-location">Preferred Location</label>
@@ -363,6 +370,7 @@
             <option value="Pasig City">Pasig City</option>
             <option value="Mandaluyong">Mandaluyong</option>
             <option value="Pasay City">Pasay City</option>
+            <option value="Taguig">Taguig</option>
           </select>
         </div>
         <div class="form-group">
@@ -394,29 +402,29 @@
             <option value="Flexible">Flexible</option>
           </select>
         </div>
-        <div class="form-group">
+        <div class="form-group salary-range-group">
           <label>Expected Salary Range (₱)</label>
-          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;min-width:0;">
+          <div class="salary-row">
             <input type="number" id="pref-salary-min" placeholder="Min ₱" />
-            <span style="color:var(--text3);font-weight:600;">–</span>
+            <span class="salary-sep">–</span>
             <input type="number" id="pref-salary-max" placeholder="Max ₱" />
           </div>
         </div>
       </div>
       <div style="margin-top:16px;">
-        <button class="btn btn-primary" id="save-prefs-btn">💾 Save Preferences</button>
+        <button class="btn btn-primary" id="save-prefs-btn"><span class="emoji">💾 </span>Save Preferences</button>
       </div>
     </div>
 
     <!-- Advanced: Weights -->
     <div class="card">
       <div class="collapsible-header" id="weights-toggle">
-        <h3>⚖️ Advanced: Scoring Weights</h3>
+        <h3><span class="emoji">⚖️ </span>Advanced: Scoring Weights</h3>
         <span class="collapsible-toggle">▼</span>
       </div>
       <div class="collapsible-body collapsed" id="weights-body" style="max-height:0;">
         <div style="padding-top:16px;">
-          <p style="font-size:0.82rem;color:var(--text2);margin-bottom:16px;">Adjust how much each factor contributes to your candidacy score. Total weights are normalized automatically.</p>
+          <p style="font-size:0.82rem;color:var(--text2);margin-bottom:16px;">Adjust how much each factor contributes to your candidacy score (1–10). Total weights are normalized automatically.</p>
           <div id="weights-sliders"></div>
           <div style="margin-top:16px;">
             <button class="btn btn-secondary btn-sm" id="reset-weights-btn">↺ Reset to Default</button>
@@ -427,7 +435,7 @@
 
     <!-- Appearance -->
     <div class="card">
-      <div class="card-header"><span class="card-icon">🎨</span><h2>Appearance</h2></div>
+      <div class="card-header"><span class="card-icon emoji">🎨</span><h2>Appearance</h2></div>
       <div class="profile-section">
         <h3>Color Theme</h3>
         <div class="theme-pickers" id="theme-swatches">
@@ -445,23 +453,34 @@
           <button class="font-btn" data-font="Arial" style="font-family:'Arial',sans-serif;">Arial</button>
         </div>
       </div>
+      <div class="profile-section" style="margin-top:16px;">
+        <h3>Emojis</h3>
+        <div style="display:flex;align-items:center;gap:12px;margin-top:8px;">
+          <label class="toggle-switch">
+            <input type="checkbox" id="emoji-toggle" />
+            <span class="toggle-slider"></span>
+          </label>
+          <span style="font-size:0.88rem;color:var(--text2);" id="emoji-toggle-label">Emojis off</span>
+        </div>
+        <p style="font-size:0.78rem;color:var(--text3);margin-top:6px;">The 📎 paperclip in Resume upload is always shown.</p>
+      </div>
     </div>
 
     <!-- Data -->
     <div class="card">
-      <div class="card-header"><span class="card-icon">💾</span><h2>Data Management</h2></div>
+      <div class="card-header"><span class="card-icon emoji">💾</span><h2>Data Management</h2></div>
       <div class="io-row">
-        <button class="btn btn-secondary" id="export-csv-btn">⬇️ Export CSV</button>
+        <button class="btn btn-secondary" id="export-csv-btn"><span class="emoji">⬇️ </span>Export CSV</button>
         <label class="btn btn-secondary" style="cursor:pointer;">
-          ⬆️ Import CSV
+          <span class="emoji">⬆️ </span>Import CSV
           <input type="file" id="import-csv-file" accept=".csv" hidden />
         </label>
       </div>
       <div class="divider"></div>
       <div class="danger-zone">
-        <h3>⚠️ Danger Zone</h3>
+        <h3><span class="emoji">⚠️ </span>Danger Zone</h3>
         <p style="font-size:0.82rem;color:var(--text2);margin-bottom:12px;">This will permanently delete all your job applications and profile data.</p>
-        <button class="btn btn-danger" id="delete-all-btn">🗑️ Delete All Data</button>
+        <button class="btn btn-danger" id="delete-all-btn"><span class="emoji">🗑️ </span>Delete All Data</button>
       </div>
     </div>
 
@@ -472,8 +491,9 @@
 <!-- FOOTER -->
 <footer class="footer">
   Visit <a href="https://neushimo.com/jobmiw" target="_blank" rel="noopener"><strong>neushimo.com</strong></a> for updates<br/>
-  ©2026 Neo Antonio · All rights reserved<br/>
-  <span style="color:var(--primary-light);">JobMiw v1.0</span>
+  ©2026 Neo Antonio<br/>
+  All rights reserved<br/>
+  <span style="color:var(--primary-light);">JobMiw v1.1</span>
 </footer>
 
 <!-- TOAST CONTAINER -->
@@ -487,12 +507,12 @@
 <div class="modal-overlay" id="edit-modal" style="display:none;">
   <div class="modal">
     <div class="modal-header">
-      <span class="modal-title">✏️ Edit Application</span>
+      <span class="modal-title"><span class="emoji">✏️ </span>Edit Application</span>
       <button class="modal-close" onclick="closeModal('edit-modal')">✕</button>
     </div>
     <div class="form-grid" id="edit-form-inner"></div>
     <div style="margin-top:20px;display:flex;gap:10px;flex-wrap:wrap;">
-      <button class="btn btn-primary" id="save-edit-btn">💾 Save Changes</button>
+      <button class="btn btn-primary" id="save-edit-btn"><span class="emoji">💾 </span>Save Changes</button>
       <button class="btn btn-secondary" onclick="closeModal('edit-modal')">Cancel</button>
     </div>
   </div>
@@ -502,12 +522,12 @@
 <div class="modal-overlay" id="delete-modal" style="display:none;">
   <div class="modal">
     <div class="modal-header">
-      <span class="modal-title">🗑️ Delete Application</span>
+      <span class="modal-title"><span class="emoji">🗑️ </span>Delete Application</span>
       <button class="modal-close" onclick="closeModal('delete-modal')">✕</button>
     </div>
     <p style="color:var(--text2);font-size:0.9rem;margin-bottom:20px;">Are you sure you want to delete <strong id="delete-app-name"></strong>? This cannot be undone.</p>
     <div style="display:flex;gap:10px;">
-      <button class="btn btn-danger" id="confirm-delete-btn">🗑️ Yes, Delete</button>
+      <button class="btn btn-danger" id="confirm-delete-btn"><span class="emoji">🗑️ </span>Yes, Delete</button>
       <button class="btn btn-secondary" onclick="closeModal('delete-modal')">Cancel</button>
     </div>
   </div>
@@ -517,13 +537,13 @@
 <div class="modal-overlay" id="ai-modal" style="display:none;">
   <div class="modal">
     <div class="modal-header">
-      <span class="modal-title">🤖 AI Interview Trainer</span>
+      <span class="modal-title"><span class="emoji">🤖 </span>AI Interview Trainer</span>
       <button class="modal-close" onclick="closeModal('ai-modal')">✕</button>
     </div>
     <p style="color:var(--text2);font-size:0.88rem;margin-bottom:4px;">Select which job you want to practice an interview for:</p>
     <div class="ai-modal-job-list" id="ai-job-list"></div>
     <div class="disclaimer">
-      ⚠️ <strong>Disclaimer:</strong> This feature redirects you to ChatGPT for a mock interview session (initial / HR screening). JobMiw is not liable for any success or failure in your actual job interviews. It is your sole responsibility to research and prepare for actual job interviews.
+      <span class="emoji">⚠️ </span><strong>Disclaimer:</strong> This feature redirects you to ChatGPT for a mock interview session (initial / HR screening). JobMiw is not liable for any success or failure in your actual job interviews. It is your sole responsibility to research and prepare for actual job interviews.
     </div>
   </div>
 </div>
@@ -532,14 +552,14 @@
 <div class="modal-overlay" id="delete-all-modal" style="display:none;">
   <div class="modal">
     <div class="modal-header">
-      <span class="modal-title">⚠️ Delete All Data</span>
+      <span class="modal-title"><span class="emoji">⚠️ </span>Delete All Data</span>
       <button class="modal-close" onclick="closeModal('delete-all-modal')">✕</button>
     </div>
     <p style="color:var(--text2);font-size:0.9rem;margin-bottom:20px;">This will permanently delete <strong>all your applications and profile data</strong>. This cannot be undone.</p>
     <p style="font-size:0.85rem;color:var(--text3);margin-bottom:20px;">Type <strong>DELETE</strong> to confirm:</p>
     <input type="text" id="delete-all-confirm-input" placeholder="Type DELETE" style="margin-bottom:16px;" />
     <div style="display:flex;gap:10px;">
-      <button class="btn btn-danger" id="confirm-delete-all-btn">🗑️ Delete Everything</button>
+      <button class="btn btn-danger" id="confirm-delete-all-btn"><span class="emoji">🗑️ </span>Delete Everything</button>
       <button class="btn btn-secondary" onclick="closeModal('delete-all-modal')">Cancel</button>
     </div>
   </div>

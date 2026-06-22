@@ -22,23 +22,27 @@ let profile = DB.get('jobmiw_profile', {
 let currentEditId = null;
 let currentDeleteId = null;
 let interestValue = 5;
+let emojisEnabled = DB.get('jobmiw_emojis', false);
 
 function getDefaultWeights() {
   return {
-    status: 25,
-    recency: 20,
-    interest: 15,
-    skills: 12,
-    salary: 10,
-    location: 8,
-    loctype: 5,
-    emptype: 3,
-    schedule: 2
+    status: 5,
+    recency: 4,
+    interest: 3,
+    skills: 3,
+    salary: 2,
+    location: 2,
+    loctype: 1,
+    emptype: 1,
+    schedule: 1
   };
 }
 
 function saveApps() { DB.set('jobmiw_apps', applications); }
 function saveProfile() { DB.set('jobmiw_profile', profile); }
+
+// ── Emoji helper ─────────────────────────────
+function em(str) { return emojisEnabled ? str : ''; }
 
 // ── ID Generator ─────────────────────────────
 function genId() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
@@ -72,6 +76,30 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
   });
 });
 
+// ── "Other" Dropdown helpers ──────────────────
+function toggleOther(select, otherId) {
+  const input = document.getElementById(otherId);
+  if (!input) return;
+  if (select.value === 'Other') {
+    input.style.display = 'block';
+    input.focus();
+  } else {
+    input.style.display = 'none';
+    input.value = '';
+  }
+}
+window.toggleOther = toggleOther;
+
+function resolveOther(selectId, otherId) {
+  const sel = document.getElementById(selectId);
+  if (!sel) return '';
+  if (sel.value === 'Other') {
+    const inp = document.getElementById(otherId);
+    return inp ? (inp.value.trim() || 'Other') : 'Other';
+  }
+  return sel.value;
+}
+
 // ── Interest Dots ─────────────────────────────
 function initInterestDots() {
   const wrap = document.getElementById('interest-dots');
@@ -101,24 +129,25 @@ document.getElementById('apply-form').addEventListener('submit', e => {
   e.preventDefault();
   const company = document.getElementById('f-company').value.trim();
   const position = document.getElementById('f-position').value.trim();
-  if (!company || !position) { toast('🐱 Please fill in company and position!'); return; }
+  if (!company || !position) { toast('Please fill in company and position!'); return; }
 
   const app = {
     id: genId(),
     company,
     position,
     date: document.getElementById('f-date').value,
-    source: document.getElementById('f-source').value,
-    location: document.getElementById('f-location').value,
+    source: resolveOther('f-source', 'f-source-other'),
+    location: resolveOther('f-location', 'f-location-other'),
     loctype: document.getElementById('f-loctype').value,
     emptype: document.getElementById('f-emptype').value,
-    schedule: document.getElementById('f-schedule').value,
+    schedule: resolveOther('f-schedule', 'f-schedule-other'),
     salaryMin: document.getElementById('f-salary-min').value,
     salaryMax: document.getElementById('f-salary-max').value,
     experience: document.getElementById('f-experience').value.trim(),
     interest: interestValue,
     skills: document.getElementById('f-skills').value.trim(),
     contactPerson: document.getElementById('f-contact-person').value.trim(),
+    contactPosition: document.getElementById('f-contact-position').value.trim(),
     contactEmail: document.getElementById('f-contact-email').value.trim(),
     contactNum: document.getElementById('f-contact-num').value.trim(),
     notes: document.getElementById('f-notes').value.trim(),
@@ -128,9 +157,13 @@ document.getElementById('apply-form').addEventListener('submit', e => {
 
   applications.unshift(app);
   saveApps();
-  updateHeaderStats();
-  toast('🎉 Application saved! Good luck, ' + company + '~');
+  toast(`${em('🎉 ')}Application saved! Good luck, ${company}~`);
   e.target.reset();
+  // Reset other-inputs
+  ['f-source-other','f-location-other','f-schedule-other'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
   document.getElementById('f-date').value = new Date().toISOString().slice(0, 10);
   interestValue = 5;
   initInterestDots();
@@ -138,22 +171,15 @@ document.getElementById('apply-form').addEventListener('submit', e => {
 
 document.getElementById('clear-form-btn').addEventListener('click', () => {
   document.getElementById('apply-form').reset();
+  ['f-source-other','f-location-other','f-schedule-other'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
   document.getElementById('f-date').value = new Date().toISOString().slice(0, 10);
   interestValue = 5;
   initInterestDots();
-  toast('✨ Form cleared!');
+  toast(`${em('✨ ')}Form cleared!`);
 });
-
-// ── Header Stats ─────────────────────────────
-function updateHeaderStats() {
-  document.getElementById('hdr-total').textContent = applications.length;
-  document.getElementById('hdr-active').textContent = applications.filter(a =>
-    !['Rejected'].includes(a.status)
-  ).length;
-  document.getElementById('hdr-interviews').textContent = applications.filter(a =>
-    ['Interview', 'Shortlisted'].includes(a.status)
-  ).length;
-}
 
 // ── Days Since ───────────────────────────────
 function daysSince(dateStr) {
@@ -194,7 +220,7 @@ function renderList() {
   if (source) apps = apps.filter(a => a.source === source);
 
   if (!apps.length) {
-    grid.innerHTML = `<div class="empty-state"><div class="empty-icon">🐱</div><p><strong>No applications found!</strong><br/>Try adjusting your filters.</p></div>`;
+    grid.innerHTML = `<div class="empty-state"><div class="empty-icon">${em('🐱')}</div><p><strong>No applications found!</strong><br/>Try adjusting your filters.</p></div>`;
     return;
   }
 
@@ -207,7 +233,7 @@ function renderList() {
       <div class="app-card-header">
         <div>
           <div class="app-card-title">${esc(app.company)}</div>
-          <div class="app-card-sub">📌 ${esc(app.position)}</div>
+          <div class="app-card-sub">${em('📌 ')}${esc(app.position)}</div>
         </div>
         <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
           <span class="status-badge ${sc}">${app.status}</span>
@@ -215,19 +241,19 @@ function renderList() {
         </div>
       </div>
       <div class="app-card-meta">
-        ${app.location ? `<span class="meta-tag">📍 ${esc(app.location)}</span>` : ''}
-        ${app.loctype ? `<span class="meta-tag">${loctypeIcon(app.loctype)} ${esc(app.loctype)}</span>` : ''}
-        ${app.emptype ? `<span class="meta-tag">💼 ${esc(app.emptype)}</span>` : ''}
-        ${salary ? `<span class="meta-tag">💰 ${salary}</span>` : ''}
-        ${app.source ? `<span class="meta-tag">🔗 ${esc(app.source)}</span>` : ''}
-        ${app.interest ? `<span class="meta-tag">❤️ ${app.interest}/10</span>` : ''}
+        ${app.location ? `<span class="meta-tag">${em('📍 ')}${esc(app.location)}</span>` : ''}
+        ${app.loctype ? `<span class="meta-tag">${em(loctypeIcon(app.loctype) + ' ')}${esc(app.loctype)}</span>` : ''}
+        ${app.emptype ? `<span class="meta-tag">${em('💼 ')}${esc(app.emptype)}</span>` : ''}
+        ${salary ? `<span class="meta-tag">${em('💰 ')}${salary}</span>` : ''}
+        ${app.source ? `<span class="meta-tag">${em('🔗 ')}${esc(app.source)}</span>` : ''}
+        ${app.interest ? `<span class="meta-tag">${em('❤️ ')}${app.interest}/10</span>` : ''}
       </div>
       <div class="app-card-actions">
         <select class="status-select ${sc}" onchange="updateStatus('${app.id}', this.value)" style="background:var(--bg2);">
           ${['Applied','Viewed','Shortlisted','Interview','Offered','Rejected'].map(s => `<option${s===app.status?' selected':''}>${s}</option>`).join('')}
         </select>
-        <button class="btn btn-secondary btn-sm" onclick="openEditModal('${app.id}')">✏️ Edit</button>
-        <button class="btn btn-danger btn-sm" onclick="openDeleteModal('${app.id}')">🗑️</button>
+        <button class="btn btn-secondary btn-sm" onclick="openEditModal('${app.id}')">${em('✏️ ')}Edit</button>
+        <button class="btn btn-danger btn-sm" onclick="openDeleteModal('${app.id}')">${em('🗑️')}</button>
       </div>
     </div>`;
   }).join('');
@@ -249,8 +275,7 @@ function updateStatus(id, status) {
   if (app) {
     app.status = status;
     saveApps();
-    updateHeaderStats();
-    toast(`Status updated to "${status}" 🐱`);
+    toast(`Status updated to "${status}"`);
     renderList();
   }
 }
@@ -282,10 +307,16 @@ function openEditModal(id) {
       <select id="e-status">${['Applied','Viewed','Shortlisted','Interview','Offered','Rejected'].map(s=>`<option${s===app.status?' selected':''}>${s}</option>`).join('')}</select>
     </div>
     <div class="form-group"><label>Source</label>
-      <select id="e-source">${['','LinkedIn','JobStreet','BossJob','Indeed','Referral','Walk-in'].map(s=>`<option${s===app.source?' selected':''}>${s||'Select source…'}</option>`).join('')}</select>
+      <select id="e-source" onchange="toggleOther(this,'e-source-other')">
+        ${['','LinkedIn','JobStreet','BossJob','Indeed','Referral','Walk-in','Other'].map(s=>`<option${(s===app.source||(!['LinkedIn','JobStreet','BossJob','Indeed','Referral','Walk-in',''].includes(app.source)&&s==='Other'))?' selected':''}>${s||'Select source…'}</option>`).join('')}
+      </select>
+      <input type="text" id="e-source-other" class="other-input" placeholder="Specify source…" style="display:${!['LinkedIn','JobStreet','BossJob','Indeed','Referral','Walk-in',''].includes(app.source)?'block':'none'};margin-top:6px;" value="${!['LinkedIn','JobStreet','BossJob','Indeed','Referral','Walk-in',''].includes(app.source)?esc(app.source):''}" />
     </div>
     <div class="form-group"><label>Location</label>
-      <select id="e-location">${['','Manila','Makati','Quezon City','Pasig City','Mandaluyong','Pasay City'].map(s=>`<option${s===app.location?' selected':''}>${s||'Select city…'}</option>`).join('')}</select>
+      <select id="e-location" onchange="toggleOther(this,'e-location-other')">
+        ${['','Manila','Makati','Quezon City','Pasig City','Mandaluyong','Pasay City','Taguig','Other'].map(s=>`<option${(s===app.location||(!['Manila','Makati','Quezon City','Pasig City','Mandaluyong','Pasay City','Taguig',''].includes(app.location)&&s==='Other'))?' selected':''}>${s||'Select city…'}</option>`).join('')}
+      </select>
+      <input type="text" id="e-location-other" class="other-input" placeholder="Specify location…" style="display:${!['Manila','Makati','Quezon City','Pasig City','Mandaluyong','Pasay City','Taguig',''].includes(app.location)?'block':'none'};margin-top:6px;" value="${!['Manila','Makati','Quezon City','Pasig City','Mandaluyong','Pasay City','Taguig',''].includes(app.location)?esc(app.location):''}" />
     </div>
     <div class="form-group"><label>Location Type</label>
       <select id="e-loctype">${['','On-site','Hybrid','Remote'].map(s=>`<option${s===app.loctype?' selected':''}>${s||'Select type…'}</option>`).join('')}</select>
@@ -293,15 +324,33 @@ function openEditModal(id) {
     <div class="form-group"><label>Employment Type</label>
       <select id="e-emptype">${['','Regular','Contractual','Seasonal','Part-time','Freelance'].map(s=>`<option${s===app.emptype?' selected':''}>${s||'Select type…'}</option>`).join('')}</select>
     </div>
-    <div class="form-group"><label>Salary Min ₱</label><input type="number" id="e-sal-min" value="${app.salaryMin||''}" /></div>
-    <div class="form-group"><label>Salary Max ₱</label><input type="number" id="e-sal-max" value="${app.salaryMax||''}" /></div>
+    <div class="form-group"><label>Work Schedule</label>
+      <select id="e-schedule" onchange="toggleOther(this,'e-schedule-other')">
+        ${['','Mon-Fri Day','Mon-Sat Day','Night shift','Shifting','Flexible','Other'].map(s=>`<option${(s===app.schedule||(!['Mon-Fri Day','Mon-Sat Day','Night shift','Shifting','Flexible',''].includes(app.schedule)&&s==='Other'))?'selected':''}>${s||'Select schedule…'}</option>`).join('')}
+      </select>
+      <input type="text" id="e-schedule-other" class="other-input" placeholder="Specify schedule…" style="display:${!['Mon-Fri Day','Mon-Sat Day','Night shift','Shifting','Flexible',''].includes(app.schedule)?'block':'none'};margin-top:6px;" value="${!['Mon-Fri Day','Mon-Sat Day','Night shift','Shifting','Flexible',''].includes(app.schedule)?esc(app.schedule):''}" />
+    </div>
+    <div class="form-group salary-range-group" style="grid-column:1/-1;">
+      <label>Salary Range</label>
+      <div class="salary-row">
+        <input type="number" id="e-sal-min" placeholder="Min ₱" value="${app.salaryMin||''}" />
+        <span class="salary-sep">–</span>
+        <input type="number" id="e-sal-max" placeholder="Max ₱" value="${app.salaryMax||''}" />
+      </div>
+    </div>
     <div class="form-group"><label>Interest (1–10)</label><input type="number" id="e-interest" min="1" max="10" value="${app.interest||5}" /></div>
+    <div class="form-group"><label>Contact Person</label><input id="e-contact-person" value="${esc(app.contactPerson||'')}" placeholder="e.g. Maria Santos" /></div>
+    <div class="form-group"><label>Contact Position</label><input id="e-contact-position" value="${esc(app.contactPosition||'')}" placeholder="e.g. HR Manager" /></div>
     <div class="form-group full-width"><label>Skills</label><input id="e-skills" value="${esc(app.skills)}" /></div>
     <div class="form-group full-width"><label>Notes</label><textarea id="e-notes">${esc(app.notes)}</textarea></div>
   `;
   openModal('edit-modal');
 }
 window.openEditModal = openEditModal;
+
+const KNOWN_SOURCES = ['LinkedIn','JobStreet','BossJob','Indeed','Referral','Walk-in',''];
+const KNOWN_LOCATIONS = ['Manila','Makati','Quezon City','Pasig City','Mandaluyong','Pasay City','Taguig',''];
+const KNOWN_SCHEDULES = ['Mon-Fri Day','Mon-Sat Day','Night shift','Shifting','Flexible',''];
 
 document.getElementById('save-edit-btn').addEventListener('click', () => {
   const app = applications.find(a => a.id === currentEditId);
@@ -310,20 +359,30 @@ document.getElementById('save-edit-btn').addEventListener('click', () => {
   app.position = document.getElementById('e-position').value.trim();
   app.date = document.getElementById('e-date').value;
   app.status = document.getElementById('e-status').value;
-  app.source = document.getElementById('e-source').value;
-  app.location = document.getElementById('e-location').value;
+
+  const eSrc = document.getElementById('e-source').value;
+  app.source = eSrc === 'Other' ? (document.getElementById('e-source-other').value.trim() || 'Other') : eSrc;
+
+  const eLoc = document.getElementById('e-location').value;
+  app.location = eLoc === 'Other' ? (document.getElementById('e-location-other').value.trim() || 'Other') : eLoc;
+
   app.loctype = document.getElementById('e-loctype').value;
   app.emptype = document.getElementById('e-emptype').value;
+
+  const eSched = document.getElementById('e-schedule').value;
+  app.schedule = eSched === 'Other' ? (document.getElementById('e-schedule-other').value.trim() || 'Other') : eSched;
+
   app.salaryMin = document.getElementById('e-sal-min').value;
   app.salaryMax = document.getElementById('e-sal-max').value;
   app.interest = parseInt(document.getElementById('e-interest').value) || 5;
+  app.contactPerson = document.getElementById('e-contact-person').value.trim();
+  app.contactPosition = document.getElementById('e-contact-position').value.trim();
   app.skills = document.getElementById('e-skills').value.trim();
   app.notes = document.getElementById('e-notes').value.trim();
   saveApps();
-  updateHeaderStats();
   closeModal('edit-modal');
   renderList();
-  toast('✏️ Application updated!');
+  toast(`${em('✏️ ')}Application updated!`);
 });
 
 // ── Delete Modal ──────────────────────────────
@@ -339,11 +398,10 @@ window.openDeleteModal = openDeleteModal;
 document.getElementById('confirm-delete-btn').addEventListener('click', () => {
   applications = applications.filter(a => a.id !== currentDeleteId);
   saveApps();
-  updateHeaderStats();
   closeModal('delete-modal');
   renderList();
   if (document.getElementById('tab-prep').classList.contains('active')) renderPrep();
-  toast('🗑️ Application deleted.');
+  toast(`${em('🗑️ ')}Application deleted.`);
 });
 
 // ── Scoring Engine ────────────────────────────
@@ -354,23 +412,19 @@ function scoreApplication(app) {
   const factors = [];
   const days = daysSince(app.date);
 
-  // Status score
   const statusScores = { Applied: 0.15, Viewed: 0.4, Shortlisted: 0.65, Interview: 0.85, Offered: 1.0, Rejected: 0 };
   const ss = statusScores[app.status] ?? 0.15;
   score += (ss * w.status);
-  factors.push({ label: '📊 Status', match: ss >= 0.65 ? 'match' : ss >= 0.35 ? 'partial' : 'miss' });
+  factors.push({ label: `${em('📊 ')}Status`, match: ss >= 0.65 ? 'match' : ss >= 0.35 ? 'partial' : 'miss' });
 
-  // Recency (28 days = archive)
   const rec = Math.max(0, 1 - days / 28);
   score += (rec * w.recency);
-  factors.push({ label: `📅 ${days}d ago`, match: days <= 7 ? 'match' : days <= 18 ? 'partial' : 'miss' });
+  factors.push({ label: `${em('📅 ')}${days}d ago`, match: days <= 7 ? 'match' : days <= 18 ? 'partial' : 'miss' });
 
-  // Interest
   const interestScore = (app.interest || 5) / 10;
   score += (interestScore * w.interest);
-  factors.push({ label: `❤️ Interest ${app.interest}/10`, match: app.interest >= 7 ? 'match' : app.interest >= 4 ? 'partial' : 'miss' });
+  factors.push({ label: `${em('❤️ ')}Interest ${app.interest}/10`, match: app.interest >= 7 ? 'match' : app.interest >= 4 ? 'partial' : 'miss' });
 
-  // Skills
   if (profile.skills && profile.skills.length && app.skills) {
     const mySkills = profile.skills.map(s => s.toLowerCase());
     const jobSkills = app.skills.split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
@@ -378,17 +432,16 @@ function scoreApplication(app) {
       const matched = jobSkills.filter(js => mySkills.some(ms => ms.includes(js) || js.includes(ms)));
       const ratio = matched.length / jobSkills.length;
       score += (ratio * w.skills);
-      factors.push({ label: `🔧 Skills ${matched.length}/${jobSkills.length}`, match: ratio >= 0.7 ? 'match' : ratio >= 0.4 ? 'partial' : 'miss' });
+      factors.push({ label: `${em('🔧 ')}Skills ${matched.length}/${jobSkills.length}`, match: ratio >= 0.7 ? 'match' : ratio >= 0.4 ? 'partial' : 'miss' });
     } else {
       score += (0.5 * w.skills);
-      factors.push({ label: '🔧 Skills N/A', match: 'partial' });
+      factors.push({ label: `${em('🔧 ')}Skills N/A`, match: 'partial' });
     }
   } else {
     score += (0.5 * w.skills);
-    factors.push({ label: '🔧 Skills N/A', match: 'partial' });
+    factors.push({ label: `${em('🔧 ')}Skills N/A`, match: 'partial' });
   }
 
-  // Salary
   if (profile.salaryMin && app.salaryMax) {
     const myMin = parseFloat(profile.salaryMin);
     const jobMax = parseFloat(app.salaryMax);
@@ -397,45 +450,41 @@ function scoreApplication(app) {
     if (jobMax >= myMin) salScore = jobMax > (myMin * 1.2) ? 1 : 0.8;
     else if (jobMin > 0 && jobMin >= myMin * 0.8) salScore = 0.5;
     score += (salScore * w.salary);
-    factors.push({ label: `💰 Salary`, match: salScore >= 0.8 ? 'match' : salScore >= 0.5 ? 'partial' : 'miss' });
+    factors.push({ label: `${em('💰 ')}Salary`, match: salScore >= 0.8 ? 'match' : salScore >= 0.5 ? 'partial' : 'miss' });
   } else {
     score += (0.5 * w.salary);
-    factors.push({ label: '💰 Salary N/A', match: 'partial' });
+    factors.push({ label: `${em('💰 ')}Salary N/A`, match: 'partial' });
   }
 
-  // Location
   if (profile.prefLocation && app.location) {
     const locMatch = profile.prefLocation === app.location;
     score += (locMatch ? 1 : 0.3) * w.location;
-    factors.push({ label: `📍 ${app.location}`, match: locMatch ? 'match' : 'miss' });
+    factors.push({ label: `${em('📍 ')}${app.location}`, match: locMatch ? 'match' : 'miss' });
   } else {
     score += (0.5 * w.location);
-    factors.push({ label: '📍 Location N/A', match: 'partial' });
+    factors.push({ label: `${em('📍 ')}Location N/A`, match: 'partial' });
   }
 
-  // Location type
   if (profile.prefLoctype && app.loctype) {
     const lMatch = profile.prefLoctype === app.loctype;
     score += (lMatch ? 1 : 0.3) * w.loctype;
-    factors.push({ label: `${loctypeIcon(app.loctype)} ${app.loctype}`, match: lMatch ? 'match' : 'miss' });
+    factors.push({ label: `${em(loctypeIcon(app.loctype) + ' ')}${app.loctype}`, match: lMatch ? 'match' : 'miss' });
   } else {
     score += (0.5 * w.loctype);
   }
 
-  // Employment type
   if (profile.prefEmptype && app.emptype) {
     const eMatch = profile.prefEmptype === app.emptype;
     score += (eMatch ? 1 : 0.3) * w.emptype;
-    factors.push({ label: `💼 ${app.emptype}`, match: eMatch ? 'match' : 'miss' });
+    factors.push({ label: `${em('💼 ')}${app.emptype}`, match: eMatch ? 'match' : 'miss' });
   } else {
     score += (0.5 * w.emptype);
   }
 
-  // Schedule
   if (profile.prefSchedule && app.schedule) {
     const sMatch = profile.prefSchedule === app.schedule;
     score += (sMatch ? 1 : 0.3) * w.schedule;
-    factors.push({ label: `🕐 ${app.schedule}`, match: sMatch ? 'match' : 'miss' });
+    factors.push({ label: `${em('🕐 ')}${app.schedule}`, match: sMatch ? 'match' : 'miss' });
   } else {
     score += (0.5 * w.schedule);
   }
@@ -468,22 +517,22 @@ function renderPrep() {
   const grid = document.getElementById('prep-grid');
   const order = prepFilter ? [prepFilter] : ['High', 'Medium', 'Low', 'Archived'];
   const colors = { High: 'high', Medium: 'medium', Low: 'low', Archived: 'archived' };
-  const icons = { High: '🟢', Medium: '🟡', Low: '🔴', Archived: '📦' };
+  const icons = { High: '', Medium: '', Low: '', Archived: `${em('📦 ')}` };
 
   grid.innerHTML = order.map(chance => {
     const items = groups[chance] || [];
-    if (!items.length && prepFilter) return `<div class="empty-state"><div class="empty-icon">🐱</div><p>No ${chance} chance applications.</p></div>`;
+    if (!items.length && prepFilter) return `<div class="empty-state"><div class="empty-icon">${em('🐱')}</div><p>No ${chance} chance applications.</p></div>`;
     if (!items.length) return '';
     return `
     <div class="chance-section">
       <div class="chance-header">
         <span class="chance-dot dot-${colors[chance]}"></span>
-        <span class="chance-label">${icons[chance]} ${chance} Chances</span>
+        <span class="chance-label">${icons[chance]}${chance} Chances</span>
         <span class="chance-count">${items.length}</span>
       </div>
       ${items.map(item => renderJobChanceCard(item, colors[chance])).join('')}
     </div>`;
-  }).join('') || `<div class="empty-state"><div class="empty-icon">🐱</div><p>No applications yet! Go add some from the Apply tab.</p></div>`;
+  }).join('') || `<div class="empty-state"><div class="empty-icon">${em('🐱')}</div><p>No applications yet! Go add some from the Apply tab.</p></div>`;
 }
 
 function renderJobChanceCard({ app, pct, chance, factors, days }, colorClass) {
@@ -492,7 +541,7 @@ function renderJobChanceCard({ app, pct, chance, factors, days }, colorClass) {
     <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;">
       <div>
         <div class="app-card-title">${esc(app.company)}</div>
-        <div class="app-card-sub">📌 ${esc(app.position)}</div>
+        <div class="app-card-sub">${em('📌 ')}${esc(app.position)}</div>
       </div>
       <div style="text-align:right;flex-shrink:0;">
         <div style="font-size:1.2rem;font-weight:700;color:var(--primary);">${pct}%</div>
@@ -507,7 +556,7 @@ function renderJobChanceCard({ app, pct, chance, factors, days }, colorClass) {
     </div>
     <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;align-items:center;">
       <span class="status-badge ${statusClass(app.status)}">${app.status}</span>
-      ${days >= 28 ? '<span class="days-badge old">⚠️ Archived</span>' : ''}
+      ${days >= 28 ? `<span class="days-badge old">${em('⚠️ ')}Archived</span>` : ''}
     </div>
   </div>`;
 }
@@ -532,13 +581,28 @@ function renderPieChart(apps) {
   const legend = document.getElementById('pie-legend');
 
   if (!total) {
-    svg.innerHTML = `<circle cx="70" cy="70" r="55" fill="var(--border)" />`;
-    legend.innerHTML = `<div class="legend-item" style="color:var(--text3)">No data yet</div>`;
+    svg.innerHTML = `<circle cx="70" cy="70" r="55" fill="var(--border)" /><text x="70" y="75" text-anchor="middle" font-size="12" font-family="Fredoka" fill="var(--text3)">No data</text>`;
+    legend.innerHTML = `<div class="legend-item" style="color:var(--text3)">No applications yet</div>`;
     return;
   }
 
   const colors = { High: '#82c9a0', Medium: '#f5c97a', Low: '#f5a0a0', Archived: '#c0b8d0' };
   const order = ['High', 'Medium', 'Low', 'Archived'];
+
+  // Single item: draw a full circle instead of a degenerate arc
+  if (total === 1) {
+    const key = order.find(k => counts[k] === 1);
+    svg.innerHTML = `
+      <circle cx="70" cy="70" r="55" fill="${colors[key]}" opacity="0.9" />
+      <circle cx="70" cy="70" r="28" fill="var(--card)" />
+      <text x="70" y="75" text-anchor="middle" font-size="14" font-weight="700" font-family="Fredoka" fill="var(--text)">1</text>`;
+    legend.innerHTML = order.map(k => {
+      if (!counts[k]) return '';
+      return `<div class="legend-item"><span class="legend-dot" style="background:${colors[k]}"></span>${k}: <strong>1</strong> (100%)</div>`;
+    }).join('');
+    return;
+  }
+
   let startAngle = -Math.PI / 2;
   let slices = '';
 
@@ -575,12 +639,12 @@ document.getElementById('ai-interview-btn').addEventListener('click', () => {
 
   const list = document.getElementById('ai-job-list');
   if (!highApps.length) {
-    list.innerHTML = `<div class="empty-state" style="padding:20px;"><p>No high-chance applications yet! Keep applying 🐱</p></div>`;
+    list.innerHTML = `<div class="empty-state" style="padding:20px;"><p>No high-chance applications yet! Keep applying ${em('🐱')}</p></div>`;
   } else {
     list.innerHTML = highApps.map(app => `
       <div class="ai-job-item" onclick="openChatGPT('${app.id}')">
         <div class="job-name">${esc(app.position)}</div>
-        <div class="job-company">🏢 ${esc(app.company)} ${app.location ? '· 📍 ' + esc(app.location) : ''}</div>
+        <div class="job-company">${em('🏢 ')}${esc(app.company)} ${app.location ? em('· 📍 ') + esc(app.location) : ''}</div>
       </div>`).join('');
   }
   openModal('ai-modal');
@@ -593,7 +657,7 @@ function openChatGPT(appId) {
   const url = 'https://chat.openai.com/?q=' + encodeURIComponent(prompt);
   window.open(url, '_blank', 'noopener');
   closeModal('ai-modal');
-  toast('🤖 Opening ChatGPT for mock interview...');
+  toast(`${em('🤖 ')}Opening ChatGPT for mock interview...`);
 }
 window.openChatGPT = openChatGPT;
 
@@ -637,7 +701,7 @@ document.getElementById('add-skill-btn').addEventListener('click', () => {
   saveProfile();
   renderSkillTags();
   inp.value = '';
-  toast('🔧 Skill added!');
+  toast(`${em('🔧 ')}Skill added!`);
 });
 
 document.getElementById('add-skill-input').addEventListener('keydown', e => {
@@ -654,7 +718,7 @@ document.getElementById('save-prefs-btn').addEventListener('click', () => {
   profile.salaryMin = document.getElementById('pref-salary-min').value;
   profile.salaryMax = document.getElementById('pref-salary-max').value;
   saveProfile();
-  toast('💾 Preferences saved!');
+  toast(`${em('💾 ')}Preferences saved!`);
 });
 
 // ── Resume Upload ─────────────────────────────
@@ -681,7 +745,7 @@ document.getElementById('remove-resume-btn').addEventListener('click', () => {
   document.getElementById('extracted-section').style.display = 'none';
   document.getElementById('resume-drop-zone').style.display = 'block';
   resumeFile.value = '';
-  toast('📄 Resume removed.');
+  toast(`${em('📄 ')}Resume removed.`);
 });
 
 function processResume(file) {
@@ -691,11 +755,9 @@ function processResume(file) {
   info.style.display = 'flex';
   dropZone.style.display = 'none';
   document.getElementById('extracted-section').style.display = 'block';
-  toast('📄 Resume uploaded! Edit the extracted info below.');
-  // Basic text extraction hint (real extraction needs a library)
+  toast(`${em('📄 ')}Resume uploaded! Edit the extracted info below.`);
   const reader = new FileReader();
   reader.onload = () => {
-    // Store PDF as base64 for reference
     profile.resumeFileName = file.name;
     saveProfile();
   };
@@ -704,33 +766,38 @@ function processResume(file) {
 
 // ── Weights Sliders ───────────────────────────
 const WEIGHT_LABELS = {
-  status: '📊 Application Status',
-  recency: '📅 Recency (days since applied)',
-  interest: '❤️ Personal Interest',
-  skills: '🔧 Skills Match',
-  salary: '💰 Salary Alignment',
-  location: '📍 Location Match',
-  loctype: '🏠 Location Type Match',
-  emptype: '💼 Employment Type Match',
-  schedule: '🕐 Work Schedule Match'
+  status: `${em('📊 ')}Application Status`,
+  recency: `${em('📅 ')}Recency (days since applied)`,
+  interest: `${em('❤️ ')}Personal Interest`,
+  skills: `${em('🔧 ')}Skills Match`,
+  salary: `${em('💰 ')}Salary Alignment`,
+  location: `${em('📍 ')}Location Match`,
+  loctype: `${em('🏠 ')}Location Type Match`,
+  emptype: `${em('💼 ')}Employment Type Match`,
+  schedule: `${em('🕐 ')}Work Schedule Match`
 };
 
 function renderWeightSliders() {
+  const weights = profile.weights || getDefaultWeights();
   const wrap = document.getElementById('weights-sliders');
-  wrap.innerHTML = Object.entries(profile.weights || getDefaultWeights()).map(([k, v]) => `
+  wrap.innerHTML = Object.entries(weights).map(([k, v]) => `
     <div class="weight-item">
       <span class="weight-label">${WEIGHT_LABELS[k] || k}</span>
-      <input type="range" class="weight-slider" min="0" max="50" value="${v}" id="w-${k}" oninput="updateWeight('${k}', this.value)" />
-      <span class="weight-value" id="wv-${k}">${v}</span>
+      <input type="range" class="weight-slider" min="1" max="5" value="${Math.min(5,Math.max(1,v))}" id="w-${k}"
+        oninput="syncWeight('${k}', this.value, 'wn-${k}')" />
+      <input type="number" class="weight-number-input" min="1" max="5" value="${Math.min(5,Math.max(1,v))}" id="wn-${k}"
+        oninput="syncWeight('${k}', this.value, 'w-${k}')" />
     </div>`).join('');
 }
 
-function updateWeight(k, v) {
-  profile.weights[k] = parseInt(v);
-  document.getElementById('wv-' + k).textContent = v;
+function syncWeight(k, v, peerId) {
+  const val = Math.min(10, Math.max(1, parseInt(v) || 1));
+  profile.weights[k] = val;
+  const peer = document.getElementById(peerId);
+  if (peer) peer.value = val;
   saveProfile();
 }
-window.updateWeight = updateWeight;
+window.syncWeight = syncWeight;
 
 document.getElementById('reset-weights-btn').addEventListener('click', () => {
   profile.weights = getDefaultWeights();
@@ -764,6 +831,11 @@ function updateAppearanceUI() {
   const currentFont = DB.get('jobmiw_font', 'Fredoka');
   document.querySelectorAll('.theme-swatch').forEach(s => s.classList.toggle('active', s.dataset.theme === currentTheme));
   document.querySelectorAll('.font-btn').forEach(b => b.classList.toggle('active', b.dataset.font === currentFont));
+  const toggle = document.getElementById('emoji-toggle');
+  if (toggle) {
+    toggle.checked = emojisEnabled;
+    document.getElementById('emoji-toggle-label').textContent = emojisEnabled ? 'Emojis on' : 'Emojis off';
+  }
 }
 
 document.getElementById('theme-swatches').addEventListener('click', e => {
@@ -773,7 +845,7 @@ document.getElementById('theme-swatches').addEventListener('click', e => {
   document.documentElement.setAttribute('data-theme', theme);
   DB.set('jobmiw_theme', theme);
   document.querySelectorAll('.theme-swatch').forEach(s => s.classList.toggle('active', s === swatch));
-  toast('🎨 Theme changed!');
+  toast(`${em('🎨 ')}Theme changed!`);
 });
 
 document.getElementById('font-picker').addEventListener('click', e => {
@@ -783,17 +855,33 @@ document.getElementById('font-picker').addEventListener('click', e => {
   applyFont(font);
   DB.set('jobmiw_font', font);
   document.querySelectorAll('.font-btn').forEach(b => b.classList.toggle('active', b === btn));
-  toast('🔤 Font changed!');
+  toast(`${em('🔤 ')}Font changed!`);
 });
 
 function applyFont(font) {
   document.documentElement.style.setProperty('--font', `'${font}', sans-serif`);
 }
 
+// ── Emoji Toggle ──────────────────────────────
+document.getElementById('emoji-toggle').addEventListener('change', function() {
+  emojisEnabled = this.checked;
+  DB.set('jobmiw_emojis', emojisEnabled);
+  document.body.classList.toggle('hide-emoji', !emojisEnabled);
+  document.getElementById('emoji-toggle-label').textContent = emojisEnabled ? 'Emojis on' : 'Emojis off';
+  // Re-render visible tab so JS-generated content updates
+  const active = document.querySelector('.tab-btn.active');
+  if (active) {
+    const tab = active.dataset.tab;
+    if (tab === 'list') renderList();
+    if (tab === 'prep') renderPrep();
+    if (tab === 'profile') { renderWeightSliders(); }
+  }
+});
+
 // ── Export / Import CSV ───────────────────────
 document.getElementById('export-csv-btn').addEventListener('click', () => {
   if (!applications.length) { toast('No applications to export!'); return; }
-  const headers = ['id','company','position','date','source','location','loctype','emptype','schedule','salaryMin','salaryMax','experience','interest','skills','status','contactPerson','contactEmail','contactNum','notes','createdAt'];
+  const headers = ['id','company','position','date','source','location','loctype','emptype','schedule','salaryMin','salaryMax','experience','interest','skills','status','contactPerson','contactPosition','contactEmail','contactNum','notes','createdAt'];
   const rows = applications.map(a => headers.map(h => `"${String(a[h]||'').replace(/"/g,'""')}"`).join(','));
   const csv = [headers.join(','), ...rows].join('\n');
   const blob = new Blob([csv], { type: 'text/csv' });
@@ -801,7 +889,7 @@ document.getElementById('export-csv-btn').addEventListener('click', () => {
   const a = document.createElement('a');
   a.href = url; a.download = `jobmiw_export_${new Date().toISOString().slice(0,10)}.csv`;
   a.click(); URL.revokeObjectURL(url);
-  toast('⬇️ Exported ' + applications.length + ' applications!');
+  toast(`${em('⬇️ ')}Exported ${applications.length} applications!`);
 });
 
 document.getElementById('import-csv-file').addEventListener('change', function() {
@@ -826,8 +914,7 @@ document.getElementById('import-csv-file').addEventListener('change', function()
       if (!applications.find(a => a.id === imp.id)) applications.push(imp);
     });
     saveApps();
-    updateHeaderStats();
-    toast(`⬆️ Imported ${newCount} new applications!`);
+    toast(`${em('⬆️ ')}Imported ${newCount} new applications!`);
     this.value = '';
   };
   reader.readAsText(file);
@@ -841,14 +928,13 @@ document.getElementById('delete-all-btn').addEventListener('click', () => {
 
 document.getElementById('confirm-delete-all-btn').addEventListener('click', () => {
   const val = document.getElementById('delete-all-confirm-input').value.trim();
-  if (val !== 'DELETE') { toast('⚠️ Please type DELETE to confirm.'); return; }
+  if (val !== 'DELETE') { toast('Please type DELETE to confirm.'); return; }
   applications = [];
   profile = { name:'', experience:'', skills:[], prefLocation:'', prefLoctype:'', prefEmptype:'', prefSchedule:'', salaryMin:'', salaryMax:'', weights: getDefaultWeights() };
   saveApps();
   saveProfile();
-  updateHeaderStats();
   closeModal('delete-all-modal');
-  toast('🗑️ All data deleted.');
+  toast(`${em('🗑️ ')}All data deleted.`);
   loadProfileUI();
 });
 
@@ -859,30 +945,24 @@ document.querySelectorAll('.modal-overlay').forEach(overlay => {
   });
 });
 
-// ── Apply saved theme/font on load ───────────
+// ── Apply saved theme/font/emoji on load ──────
 (function init() {
   const theme = DB.get('jobmiw_theme', '');
   if (theme) document.documentElement.setAttribute('data-theme', theme);
   const font = DB.get('jobmiw_font', 'Fredoka');
   applyFont(font);
-  updateHeaderStats();
+  // Apply emoji state
+  document.body.classList.toggle('hide-emoji', !emojisEnabled);
 })();
 
 // ── PWA Register ──────────────────────────────
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js').then(reg => {
-    // Force an update check the moment the app opens
     reg.update();
-
-    // Keep checking while the app stays open (every 60s)
     setInterval(() => reg.update(), 60 * 1000);
-
-    // Also re-check whenever the tab/app regains focus
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible') reg.update();
     });
-
-    // When a new SW takes over, the page is now stale — reload once
     let refreshing = false;
     navigator.serviceWorker.addEventListener('controllerchange', () => {
       if (refreshing) return;
