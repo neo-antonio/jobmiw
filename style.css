@@ -1296,7 +1296,7 @@ select { cursor: pointer; }
 
   /* Account for bottom nav */
   .main-content {
-    padding: 16px 14px 0;
+    padding: 16px 14px 20px;
   }
 
   .footer {
