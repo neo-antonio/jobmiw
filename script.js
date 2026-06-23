@@ -21,8 +21,8 @@ let profile = DB.get('jobmiw_profile', {
 });
 let currentEditId = null;
 let currentDeleteId = null;
-let interestValue = 5;
-let emojisEnabled = DB.get('jobmiw_emojis', false);
+let interestValue = 3;
+let emojisEnabled = DB.get('jobmiw_emojis', true);
 
 function getDefaultWeights() {
   return {
@@ -104,7 +104,7 @@ function resolveOther(selectId, otherId) {
 function initInterestDots() {
   const wrap = document.getElementById('interest-dots');
   wrap.innerHTML = '';
-  for (let i = 1; i <= 10; i++) {
+  for (let i = 1; i <= 5; i++) {
     const d = document.createElement('button');
     d.type = 'button';
     d.className = 'interest-dot' + (i <= interestValue ? ' active' : '');
@@ -114,11 +114,11 @@ function initInterestDots() {
       document.querySelectorAll('.interest-dot').forEach((dot, idx) => {
         dot.classList.toggle('active', idx < i);
       });
-      document.getElementById('interest-val').textContent = i + '/10';
+      document.getElementById('interest-val').textContent = i + '/5';
     });
     wrap.appendChild(d);
   }
-  document.getElementById('interest-val').textContent = interestValue + '/10';
+  document.getElementById('interest-val').textContent = interestValue + '/5';
 }
 
 // ── Apply Form ───────────────────────────────
@@ -165,7 +165,7 @@ document.getElementById('apply-form').addEventListener('submit', e => {
     if (el) el.style.display = 'none';
   });
   document.getElementById('f-date').value = new Date().toISOString().slice(0, 10);
-  interestValue = 5;
+  interestValue = 3;
   initInterestDots();
 });
 
@@ -176,7 +176,7 @@ document.getElementById('clear-form-btn').addEventListener('click', () => {
     if (el) el.style.display = 'none';
   });
   document.getElementById('f-date').value = new Date().toISOString().slice(0, 10);
-  interestValue = 5;
+  interestValue = 3;
   initInterestDots();
   toast(`${em('✨ ')}Form cleared!`);
 });
@@ -206,7 +206,22 @@ let listFilter = '';
 let listSearch = '';
 let listSource = '';
 
+function updateStatusCounts() {
+  const statuses = ['Applied','Viewed','Shortlisted','Interview','Offered','Rejected'];
+  const total = applications.length;
+  const el = document.getElementById('count-all');
+  if (el) el.textContent = total > 0 ? total : '';
+  statuses.forEach(s => {
+    const el = document.getElementById('count-' + s);
+    if (el) {
+      const n = applications.filter(a => a.status === s).length;
+      el.textContent = n > 0 ? n : '';
+    }
+  });
+}
+
 function renderList() {
+  updateStatusCounts();
   const grid = document.getElementById('list-grid');
   let apps = [...applications];
 
@@ -246,7 +261,7 @@ function renderList() {
         ${app.emptype ? `<span class="meta-tag">${em('💼 ')}${esc(app.emptype)}</span>` : ''}
         ${salary ? `<span class="meta-tag">${em('💰 ')}${salary}</span>` : ''}
         ${app.source ? `<span class="meta-tag">${em('🔗 ')}${esc(app.source)}</span>` : ''}
-        ${app.interest ? `<span class="meta-tag">${em('❤️ ')}${app.interest}/10</span>` : ''}
+        ${app.interest ? `<span class="meta-tag">${em('❤️ ')}${app.interest}/5</span>` : ''}
       </div>
       <div class="app-card-actions">
         <select class="status-select ${sc}" onchange="updateStatus('${app.id}', this.value)" style="background:var(--bg2);">
@@ -338,7 +353,7 @@ function openEditModal(id) {
         <input type="number" id="e-sal-max" placeholder="Max ₱" value="${app.salaryMax||''}" />
       </div>
     </div>
-    <div class="form-group"><label>Interest (1–10)</label><input type="number" id="e-interest" min="1" max="10" value="${app.interest||5}" /></div>
+    <div class="form-group"><label>Interest (1–5)</label><input type="number" id="e-interest" min="1" max="5" value="${app.interest||3}" /></div>
     <div class="form-group"><label>Contact Person</label><input id="e-contact-person" value="${esc(app.contactPerson||'')}" placeholder="e.g. Maria Santos" /></div>
     <div class="form-group"><label>Contact Position</label><input id="e-contact-position" value="${esc(app.contactPosition||'')}" placeholder="e.g. HR Manager" /></div>
     <div class="form-group full-width"><label>Skills</label><input id="e-skills" value="${esc(app.skills)}" /></div>
@@ -374,7 +389,7 @@ document.getElementById('save-edit-btn').addEventListener('click', () => {
 
   app.salaryMin = document.getElementById('e-sal-min').value;
   app.salaryMax = document.getElementById('e-sal-max').value;
-  app.interest = parseInt(document.getElementById('e-interest').value) || 5;
+  app.interest = parseInt(document.getElementById('e-interest').value) || 3;
   app.contactPerson = document.getElementById('e-contact-person').value.trim();
   app.contactPosition = document.getElementById('e-contact-position').value.trim();
   app.skills = document.getElementById('e-skills').value.trim();
@@ -421,9 +436,9 @@ function scoreApplication(app) {
   score += (rec * w.recency);
   factors.push({ label: `${em('📅 ')}${days}d ago`, match: days <= 7 ? 'match' : days <= 18 ? 'partial' : 'miss' });
 
-  const interestScore = (app.interest || 5) / 10;
+  const interestScore = (app.interest || 3) / 5;
   score += (interestScore * w.interest);
-  factors.push({ label: `${em('❤️ ')}Interest ${app.interest}/10`, match: app.interest >= 7 ? 'match' : app.interest >= 4 ? 'partial' : 'miss' });
+  factors.push({ label: `${em('❤️ ')}Interest ${app.interest}/5`, match: app.interest >= 4 ? 'match' : app.interest >= 2 ? 'partial' : 'miss' });
 
   if (profile.skills && profile.skills.length && app.skills) {
     const mySkills = profile.skills.map(s => s.toLowerCase());
@@ -456,8 +471,9 @@ function scoreApplication(app) {
     factors.push({ label: `${em('💰 ')}Salary N/A`, match: 'partial' });
   }
 
-  if (profile.prefLocation && app.location) {
-    const locMatch = profile.prefLocation === app.location;
+  const prefLocs = Array.isArray(profile.prefLocations) && profile.prefLocations.length ? profile.prefLocations : (profile.prefLocation ? [profile.prefLocation] : []);
+  if (prefLocs.length && app.location) {
+    const locMatch = prefLocs.includes(app.location);
     score += (locMatch ? 1 : 0.3) * w.location;
     factors.push({ label: `${em('📍 ')}${app.location}`, match: locMatch ? 'match' : 'miss' });
   } else {
@@ -665,7 +681,11 @@ window.openChatGPT = openChatGPT;
 function loadProfileUI() {
   document.getElementById('p-name').value = profile.name || '';
   document.getElementById('p-exp').value = profile.experience || '';
-  document.getElementById('pref-location').value = profile.prefLocation || '';
+  // Preferred locations – checkboxes
+  const prefLocs = Array.isArray(profile.prefLocations) ? profile.prefLocations : (profile.prefLocation ? [profile.prefLocation] : []);
+  document.querySelectorAll('input[name="pref-loc"]').forEach(cb => {
+    cb.checked = prefLocs.includes(cb.value);
+  });
   document.getElementById('pref-loctype').value = profile.prefLoctype || '';
   document.getElementById('pref-emptype').value = profile.prefEmptype || '';
   document.getElementById('pref-schedule').value = profile.prefSchedule || '';
@@ -674,6 +694,8 @@ function loadProfileUI() {
   renderSkillTags();
   renderWeightSliders();
   updateAppearanceUI();
+  renderDocList();
+  updateDocDropZone();
 }
 
 function renderSkillTags() {
@@ -711,7 +733,8 @@ document.getElementById('add-skill-input').addEventListener('keydown', e => {
 document.getElementById('save-prefs-btn').addEventListener('click', () => {
   profile.name = document.getElementById('p-name').value.trim();
   profile.experience = document.getElementById('p-exp').value.trim();
-  profile.prefLocation = document.getElementById('pref-location').value;
+  profile.prefLocations = Array.from(document.querySelectorAll('input[name="pref-loc"]:checked')).map(cb => cb.value);
+  profile.prefLocation = profile.prefLocations[0] || '';
   profile.prefLoctype = document.getElementById('pref-loctype').value;
   profile.prefEmptype = document.getElementById('pref-emptype').value;
   profile.prefSchedule = document.getElementById('pref-schedule').value;
@@ -721,48 +744,105 @@ document.getElementById('save-prefs-btn').addEventListener('click', () => {
   toast(`${em('💾 ')}Preferences saved!`);
 });
 
-// ── Resume Upload ─────────────────────────────
-const resumeFile = document.getElementById('resume-file');
-const dropZone = document.getElementById('resume-drop-zone');
+// ── Document Storage ─────────────────────────
+let storedDocs = DB.get('jobmiw_docs', []); // [{name, size, type, data (base64)}]
 
-dropZone.addEventListener('click', () => resumeFile.click());
-dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
-dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
-dropZone.addEventListener('drop', e => {
-  e.preventDefault();
-  dropZone.classList.remove('dragover');
-  const f = e.dataTransfer.files[0];
-  if (f && f.type === 'application/pdf') processResume(f);
-});
+function saveDocuments() { DB.set('jobmiw_docs', storedDocs); }
 
-resumeFile.addEventListener('change', () => {
-  const f = resumeFile.files[0];
-  if (f) processResume(f);
-});
-
-document.getElementById('remove-resume-btn').addEventListener('click', () => {
-  document.getElementById('resume-info').style.display = 'none';
-  document.getElementById('extracted-section').style.display = 'none';
-  document.getElementById('resume-drop-zone').style.display = 'block';
-  resumeFile.value = '';
-  toast(`${em('📄 ')}Resume removed.`);
-});
-
-function processResume(file) {
-  const info = document.getElementById('resume-info');
-  document.getElementById('resume-name').textContent = file.name;
-  document.getElementById('resume-size').textContent = (file.size / 1024).toFixed(1) + ' KB';
-  info.style.display = 'flex';
-  dropZone.style.display = 'none';
-  document.getElementById('extracted-section').style.display = 'block';
-  toast(`${em('📄 ')}Resume uploaded! Edit the extracted info below.`);
-  const reader = new FileReader();
-  reader.onload = () => {
-    profile.resumeFileName = file.name;
-    saveProfile();
-  };
-  reader.readAsDataURL(file);
+function renderDocList() {
+  const list = document.getElementById('doc-list');
+  if (!list) return;
+  if (!storedDocs.length) {
+    list.innerHTML = '';
+    return;
+  }
+  list.innerHTML = '<div class="doc-items">' + storedDocs.map((doc, i) => {
+    const icon = doc.type === 'application/pdf' ? '📄' : '📝';
+    return `<div class="doc-item">
+      <span class="doc-icon">${icon}</span>
+      <div class="doc-meta">
+        <div class="doc-name">${esc(doc.name)}</div>
+        <div class="doc-size">${(doc.size / 1024).toFixed(1)} KB</div>
+      </div>
+      <div class="doc-actions">
+        <button class="btn btn-secondary btn-sm" onclick="downloadDoc(${i})">⬇ Download</button>
+        <button class="btn btn-danger btn-sm" onclick="removeDoc(${i})">✕</button>
+      </div>
+    </div>`;
+  }).join('') + '</div>';
 }
+
+function downloadDoc(i) {
+  const doc = storedDocs[i];
+  if (!doc) return;
+  const a = document.createElement('a');
+  a.href = doc.data;
+  a.download = doc.name;
+  a.click();
+  toast(`${em('⬇️ ')}Downloading ${doc.name}`);
+}
+window.downloadDoc = downloadDoc;
+
+function removeDoc(i) {
+  const name = storedDocs[i]?.name;
+  storedDocs.splice(i, 1);
+  saveDocuments();
+  renderDocList();
+  toast(`Removed ${name}`);
+}
+window.removeDoc = removeDoc;
+
+function processDocFiles(files) {
+  const allowed = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+  let added = 0;
+  const toRead = Array.from(files).filter(f => allowed.includes(f.type) || f.name.endsWith('.docx') || f.name.endsWith('.pdf'));
+  if (!toRead.length) { toast('Only PDF and DOCX files are supported.'); return; }
+  
+  toRead.forEach(file => {
+    if (storedDocs.length >= 10) { toast('Maximum 10 documents reached.'); return; }
+    if (storedDocs.find(d => d.name === file.name)) { toast(`${file.name} is already uploaded.`); return; }
+    const reader = new FileReader();
+    reader.onload = ev => {
+      storedDocs.push({ name: file.name, size: file.size, type: file.type || 'application/octet-stream', data: ev.target.result });
+      saveDocuments();
+      added++;
+      renderDocList();
+      updateDocDropZone();
+      if (added === 1) toast(`${em('📎 ')}${file.name} added!`);
+      else toast(`${em('📎 ')}${added} files added!`);
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function updateDocDropZone() {
+  const zone = document.getElementById('doc-drop-zone');
+  if (!zone) return;
+  const count = storedDocs.length;
+  const countEl = zone.querySelector('.doc-count') || document.createElement('div');
+  countEl.className = 'doc-count';
+  countEl.textContent = `${count}/10 files`;
+  if (!zone.querySelector('.doc-count')) zone.appendChild(countEl);
+  if (count >= 10) zone.style.opacity = '0.5';
+  else zone.style.opacity = '1';
+}
+
+const docDropZone = document.getElementById('doc-drop-zone');
+const docFileInput = document.getElementById('doc-file-input');
+const docBrowseBtn = document.getElementById('doc-browse-btn');
+
+if (docBrowseBtn) docBrowseBtn.addEventListener('click', () => docFileInput.click());
+if (docDropZone) {
+  docDropZone.addEventListener('click', e => { if (e.target === docDropZone || e.target.tagName === 'P' || e.target.tagName === 'DIV') docFileInput.click(); });
+  docDropZone.addEventListener('dragover', e => { e.preventDefault(); docDropZone.classList.add('dragover'); });
+  docDropZone.addEventListener('dragleave', () => docDropZone.classList.remove('dragover'));
+  docDropZone.addEventListener('drop', e => {
+    e.preventDefault();
+    docDropZone.classList.remove('dragover');
+    processDocFiles(e.dataTransfer.files);
+  });
+}
+if (docFileInput) docFileInput.addEventListener('change', () => { processDocFiles(docFileInput.files); docFileInput.value = ''; });
 
 // ── Weights Sliders ───────────────────────────
 const WEIGHT_LABELS = {
@@ -904,7 +984,7 @@ document.getElementById('import-csv-file').addEventListener('change', function()
       const obj = {};
       headers.forEach((h, i) => { obj[h] = (vals[i]||'').replace(/^"|"$/g,'').replace(/""/g,'"').trim(); });
       if (!obj.id) obj.id = genId();
-      if (!obj.interest) obj.interest = 5; else obj.interest = parseInt(obj.interest);
+      if (!obj.interest) obj.interest = 3; else obj.interest = parseInt(obj.interest);
       if (!obj.status) obj.status = 'Applied';
       return obj;
     }).filter(a => a.company && a.position);

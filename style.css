@@ -1323,3 +1323,92 @@ select { cursor: pointer; }
   .interest-dot { width: 23px; height: 23px; font-size: 0.68rem; }
   .interest-dots { gap: 3px; }
 }
+
+/* ===== DOCUMENT STORAGE ===== */
+.doc-drop-zone {
+  border: 2.5px dashed var(--primary-light);
+  border-radius: var(--radius);
+  padding: 28px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: var(--bg2);
+}
+.doc-drop-zone:hover, .doc-drop-zone.dragover {
+  border-color: var(--primary);
+  background: var(--bg);
+}
+.doc-count {
+  font-size: 0.75rem;
+  color: var(--text3);
+  margin-top: 8px;
+}
+.doc-items {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 14px;
+}
+.doc-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--bg2);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+}
+.doc-icon { font-size: 1.5rem; flex-shrink: 0; }
+.doc-meta { flex: 1; min-width: 0; }
+.doc-name { font-weight: 600; font-size: 0.85rem; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.doc-size { font-size: 0.72rem; color: var(--text3); margin-top: 2px; }
+.doc-actions { display: flex; gap: 6px; flex-shrink: 0; }
+
+/* ===== LOCATION CHECKBOXES ===== */
+.location-checkboxes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 6px 0;
+}
+.check-opt {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  border: 1.5px solid var(--border);
+  background: var(--card);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text2);
+  cursor: pointer;
+  transition: all 0.15s;
+  user-select: none;
+}
+.check-opt:hover { border-color: var(--primary); color: var(--primary); }
+.check-opt input[type="checkbox"] { display: none; }
+.check-opt:has(input:checked) {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: white;
+}
+
+/* ===== CHIP COUNTS ===== */
+.chip-count {
+  display: inline-block;
+  background: rgba(255,255,255,0.3);
+  border-radius: 10px;
+  padding: 0 6px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  min-width: 18px;
+  text-align: center;
+  margin-left: 2px;
+  vertical-align: middle;
+}
+.filter-chip:not(.active) .chip-count {
+  background: var(--bg2);
+  color: var(--text3);
+  border: 1px solid var(--border);
+}

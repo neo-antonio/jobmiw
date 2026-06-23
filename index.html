@@ -171,7 +171,7 @@
             <label>Personal Interest <span style="color:var(--text2);font-weight:400;font-size:0.8rem;">(how excited are you?)</span></label>
             <div class="interest-wrap">
               <div class="interest-dots" id="interest-dots"></div>
-              <span class="interest-value" id="interest-val">5/10</span>
+              <span class="interest-value" id="interest-val">3/5</span>
             </div>
           </div>
 
@@ -247,13 +247,13 @@
     </div>
 
     <div class="filter-chips" id="list-status-chips">
-      <button class="filter-chip active" data-status="">All</button>
-      <button class="filter-chip" data-status="Applied">Applied</button>
-      <button class="filter-chip" data-status="Viewed">Viewed</button>
-      <button class="filter-chip" data-status="Shortlisted">Shortlisted</button>
-      <button class="filter-chip" data-status="Interview">Interview</button>
-      <button class="filter-chip" data-status="Offered">Offered</button>
-      <button class="filter-chip" data-status="Rejected">Rejected</button>
+      <button class="filter-chip active" data-status="">All <span class="chip-count" id="count-all"></span></button>
+      <button class="filter-chip" data-status="Applied">Applied <span class="chip-count" id="count-Applied"></span></button>
+      <button class="filter-chip" data-status="Viewed">Viewed <span class="chip-count" id="count-Viewed"></span></button>
+      <button class="filter-chip" data-status="Shortlisted">Shortlisted <span class="chip-count" id="count-Shortlisted"></span></button>
+      <button class="filter-chip" data-status="Interview">Interview <span class="chip-count" id="count-Interview"></span></button>
+      <button class="filter-chip" data-status="Offered">Offered <span class="chip-count" id="count-Offered"></span></button>
+      <button class="filter-chip" data-status="Rejected">Rejected <span class="chip-count" id="count-Rejected"></span></button>
     </div>
 
     <div class="apps-grid" id="list-grid">
@@ -310,48 +310,38 @@
     <div class="section-title"><span class="emoji">🐱 </span>My Profile</div>
     <p class="section-sub">Set your preferences to improve job matching accuracy.</p>
 
-    <!-- Resume Upload -->
+    <!-- Documents Storage -->
     <div class="card">
-      <div class="card-header"><span class="card-icon emoji">📄</span><h2>Resume</h2></div>
-      <div class="resume-upload-area" id="resume-drop-zone">
-        <div class="upload-icon">📎</div>
-        <p>Drag & drop your PDF resume here, or click to browse</p>
-        <button type="button" class="btn btn-secondary btn-sm" onclick="document.getElementById('resume-file').click()">
-          Browse File
-        </button>
-        <input type="file" id="resume-file" accept=".pdf" hidden />
+      <div class="card-header"><span class="card-icon">📎</span><h2>My Documents</h2></div>
+      <p style="font-size:0.83rem;color:var(--text2);margin-bottom:16px;">Store your job application documents here for quick access — resume, cover letter templates, medical certificates, government IDs, and other requirements. Upload up to 10 files (.pdf or .docx).</p>
+      <div class="doc-drop-zone" id="doc-drop-zone">
+        <div style="font-size:2rem;margin-bottom:8px;">📎</div>
+        <p style="font-size:0.85rem;color:var(--text2);margin-bottom:10px;">Drag & drop files here, or click to browse</p>
+        <button type="button" class="btn btn-secondary btn-sm" id="doc-browse-btn">Browse Files</button>
+        <input type="file" id="doc-file-input" accept=".pdf,.docx" multiple hidden />
       </div>
-      <div class="resume-info" id="resume-info" style="display:none;">
-        <span class="resume-icon emoji">📄</span>
-        <div>
-          <div class="resume-name" id="resume-name">resume.pdf</div>
-          <div class="resume-size" id="resume-size">0 KB</div>
-        </div>
-        <button class="btn btn-danger btn-sm" style="margin-left:auto;" id="remove-resume-btn">Remove</button>
-      </div>
+      <div id="doc-list"></div>
+    </div>
 
-      <div id="extracted-section" style="display:none;margin-top:16px;">
-        <div class="divider"></div>
-        <div class="profile-section">
-          <h3>Extracted Info (editable)</h3>
-          <div class="form-grid">
-            <div class="form-group">
-              <label for="p-name">Your Name</label>
-              <input type="text" id="p-name" placeholder="Full name" />
-            </div>
-            <div class="form-group">
-              <label for="p-exp">Years of Experience</label>
-              <input type="text" id="p-exp" placeholder="e.g. 2 years" />
-            </div>
-          </div>
-          <div style="margin-top:12px;">
-            <label>Skills (from resume)</label>
-            <div class="skills-tags" id="profile-skills-tags"></div>
-            <div class="add-skill-row">
-              <input type="text" id="add-skill-input" placeholder="Add a skill…" />
-              <button class="btn btn-secondary btn-sm" id="add-skill-btn">+ Add</button>
-            </div>
-          </div>
+    <!-- Profile Info -->
+    <div class="card">
+      <div class="card-header"><span class="card-icon emoji">👤</span><h2>Profile Info</h2></div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="p-name">Your Name</label>
+          <input type="text" id="p-name" placeholder="Full name" />
+        </div>
+        <div class="form-group">
+          <label for="p-exp">Years of Experience</label>
+          <input type="text" id="p-exp" placeholder="e.g. 2 years" />
+        </div>
+      </div>
+      <div style="margin-top:16px;">
+        <label>Your Skills</label>
+        <div class="skills-tags" id="profile-skills-tags"></div>
+        <div class="add-skill-row">
+          <input type="text" id="add-skill-input" placeholder="Add a skill…" />
+          <button class="btn btn-secondary btn-sm" id="add-skill-btn">+ Add</button>
         </div>
       </div>
     </div>
@@ -360,18 +350,17 @@
     <div class="card">
       <div class="card-header"><span class="card-icon emoji">⚙️</span><h2>Job Preferences</h2></div>
       <div class="form-grid">
-        <div class="form-group">
-          <label for="pref-location">Preferred Location</label>
-          <select id="pref-location">
-            <option value="">No preference</option>
-            <option value="Manila">Manila</option>
-            <option value="Makati">Makati</option>
-            <option value="Quezon City">Quezon City</option>
-            <option value="Pasig City">Pasig City</option>
-            <option value="Mandaluyong">Mandaluyong</option>
-            <option value="Pasay City">Pasay City</option>
-            <option value="Taguig">Taguig</option>
-          </select>
+        <div class="form-group full-width">
+          <label>Preferred Locations <span class="optional">(select all that apply)</span></label>
+          <div class="location-checkboxes" id="pref-locations-wrap">
+            <label class="check-opt"><input type="checkbox" name="pref-loc" value="Manila" /> Manila</label>
+            <label class="check-opt"><input type="checkbox" name="pref-loc" value="Makati" /> Makati</label>
+            <label class="check-opt"><input type="checkbox" name="pref-loc" value="Quezon City" /> Quezon City</label>
+            <label class="check-opt"><input type="checkbox" name="pref-loc" value="Pasig City" /> Pasig City</label>
+            <label class="check-opt"><input type="checkbox" name="pref-loc" value="Mandaluyong" /> Mandaluyong</label>
+            <label class="check-opt"><input type="checkbox" name="pref-loc" value="Pasay City" /> Pasay City</label>
+            <label class="check-opt"><input type="checkbox" name="pref-loc" value="Taguig" /> Taguig</label>
+          </div>
         </div>
         <div class="form-group">
           <label for="pref-loctype">Preferred Location Type</label>
@@ -460,9 +449,9 @@
             <input type="checkbox" id="emoji-toggle" />
             <span class="toggle-slider"></span>
           </label>
-          <span style="font-size:0.88rem;color:var(--text2);" id="emoji-toggle-label">Emojis off</span>
+          <span style="font-size:0.88rem;color:var(--text2);" id="emoji-toggle-label"></span>
         </div>
-        <p style="font-size:0.78rem;color:var(--text3);margin-top:6px;">The 📎 paperclip in Resume upload is always shown.</p>
+
       </div>
     </div>
 
@@ -470,10 +459,10 @@
     <div class="card">
       <div class="card-header"><span class="card-icon emoji">💾</span><h2>Data Management</h2></div>
       <div class="io-row">
-        <button class="btn btn-secondary" id="export-csv-btn"><span class="emoji">⬇️ </span>Export CSV</button>
+        <button class="btn btn-secondary" id="export-csv-btn"><span class="emoji">⬇️ </span>Export Data</button>
         <label class="btn btn-secondary" style="cursor:pointer;">
-          <span class="emoji">⬆️ </span>Import CSV
-          <input type="file" id="import-csv-file" accept=".csv" hidden />
+          <span class="emoji">⬆️ </span>Import Data
+          <input type="file" id="import-csv-file" accept=".json,.csv" hidden />
         </label>
       </div>
       <div class="divider"></div>
@@ -493,7 +482,7 @@
   Visit <a href="https://neushimo.com/jobmiw" target="_blank" rel="noopener"><strong>neushimo.com</strong></a> for updates<br/>
   ©2026 Neo Antonio<br/>
   All rights reserved<br/>
-  <span style="color:var(--primary-light);">JobMiw v1.1</span>
+  <span style="color:var(--primary-light);">JobMiw v1.2</span>
 </footer>
 
 <!-- TOAST CONTAINER -->
