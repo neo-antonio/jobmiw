@@ -82,7 +82,7 @@
 
 /* ===== RESET ===== */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; overflow-x: hidden; }
+html { scroll-behavior: smooth; }
 
 body {
   font-family: var(--font);
@@ -188,7 +188,7 @@ body.hide-emoji .emoji {
 .main-content {
   max-width: 800px;
   margin: 0 auto;
-  padding: 24px 20px 32px;
+  padding: 24px 20px 16px;
   width: 100%;
   box-sizing: border-box;
 }
@@ -1141,7 +1141,7 @@ select { cursor: pointer; }
   font-size: 0.78rem;
   color: var(--text3);
   line-height: 1.9;
-  margin-top: 40px;
+  margin-top: 0;
 }
 
 .footer a { color: var(--primary); text-decoration: none; font-weight: 600; }
@@ -1296,11 +1296,12 @@ select { cursor: pointer; }
 
   /* Account for bottom nav */
   .main-content {
-    padding: 16px 14px 100px;
+    padding: 16px 14px 0;
   }
 
   .footer {
-    margin-bottom: 70px;
+    padding-bottom: calc(var(--bottom-nav-h) + 16px);
+    margin-bottom: 0;
   }
 
   .toast-container {
