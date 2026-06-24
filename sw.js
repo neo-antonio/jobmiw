@@ -1,6 +1,6 @@
 // IMPORTANT: bump this version string on every deploy so the
 // service worker is detected as changed and updates are picked up fast.
-const CACHE_NAME = 'jobmiw-v1.2';
+const CACHE_NAME = 'jobmiw-v1.3';
 const ASSETS = [
   './',
   './index.html',
